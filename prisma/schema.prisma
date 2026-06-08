@@ -107,6 +107,24 @@ enum RedirectType {
   TEMPORARY_302
 }
 
+enum CouponType {
+  PERCENTAGE
+  FIXED_AMOUNT
+}
+
+enum CouponStatus {
+  ACTIVE
+  SCHEDULED
+  EXPIRED
+  DISABLED
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 // ─────────────────────────────────────────────────────────────
 // Auth & people
 // ─────────────────────────────────────────────────────────────
@@ -142,7 +160,8 @@ model Customer {
   pricingTierId String?
   pricingTier   PricingTier?   @relation(fields: [pricingTierId], references: [id])
 
-  orders Order[]
+  orders  Order[]
+  reviews Review[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -155,10 +174,11 @@ model Customer {
 // ─────────────────────────────────────────────────────────────
 
 model Category {
-  id     String @id @default(cuid())
-  nameAr String
-  nameEn String
-  slug   String @unique
+  id       String  @id @default(cuid())
+  nameAr   String
+  nameEn   String
+  slug     String  @unique
+  imageUrl String?
 
   // Optional self-relation for parent/child categories.
   parentId String?
@@ -182,6 +202,7 @@ model Product {
   sku           String  @unique
   brand         String
   basePrice     Decimal @db.Decimal(10, 2) // retail price
+  imageUrl      String?
   active        Boolean @default(true)
 
   categoryId String
@@ -190,6 +211,7 @@ model Product {
   variants   ProductVariant[]
   tierPrices TierPrice[]
   seoMeta    SeoMeta?
+  reviews    Review[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -395,6 +417,9 @@ model Order {
   assignedWarehouseId String?
   assignedWarehouse   Warehouse? @relation(fields: [assignedWarehouseId], references: [id])
 
+  couponId String?
+  coupon   Coupon? @relation(fields: [couponId], references: [id])
+
   placedAt DateTime @default(now())
 
   items     OrderItem[]
@@ -406,6 +431,7 @@ model Order {
 
   @@index([customerId])
   @@index([assignedWarehouseId])
+  @@index([couponId])
   @@index([status])
 }
 
@@ -464,6 +490,52 @@ model Payment {
   updatedAt DateTime @updatedAt
 
   @@index([orderId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Marketing — coupons & reviews
+// ─────────────────────────────────────────────────────────────
+
+model Coupon {
+  id          String       @id @default(cuid())
+  code        String       @unique
+  description String?
+  type        CouponType
+  // PERCENTAGE → 0–100; FIXED_AMOUNT → SAR value (Decimal 10,2 either way).
+  value       Decimal      @db.Decimal(10, 2)
+  minOrder    Decimal?     @db.Decimal(10, 2)
+  usageLimit  Int? // null = unlimited
+  usageCount  Int          @default(0)
+  startsAt    DateTime
+  endsAt      DateTime?
+  status      CouponStatus @default(ACTIVE)
+
+  orders Order[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+}
+
+model Review {
+  id         String       @id @default(cuid())
+  productId  String
+  product    Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  customerId String
+  customer   Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  rating  Int // 1–5
+  title   String?
+  body    String
+  status  ReviewStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+  @@index([customerId])
+  @@index([status])
 }
 
 // ─────────────────────────────────────────────────────────────

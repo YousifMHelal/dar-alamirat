@@ -110,6 +110,7 @@ export async function getProductDetail(id: string) {
       sku: true,
       brand: true,
       basePrice: true,
+      imageUrl: true,
       active: true,
       categoryId: true,
       variants: {
@@ -146,6 +147,7 @@ export async function getProductDetail(id: string) {
     sku: p.sku,
     brand: p.brand,
     basePrice: p.basePrice.toFixed(2),
+    imageUrl: p.imageUrl,
     active: p.active,
     categoryId: p.categoryId,
     variants: p.variants.map((v) => ({
@@ -176,6 +178,48 @@ export async function listCategories() {
     select: { id: true, nameEn: true, nameAr: true, slug: true },
   });
 }
+
+/** Full category list for the category management page. */
+export async function listCategoriesDetail() {
+  const rows = await prisma.category.findMany({
+    orderBy: { nameEn: "asc" },
+    select: {
+      id: true,
+      nameEn: true,
+      nameAr: true,
+      slug: true,
+      imageUrl: true,
+      _count: { select: { products: true } },
+    },
+  });
+  return rows.map((c) => ({
+    id: c.id,
+    nameEn: c.nameEn,
+    nameAr: c.nameAr,
+    slug: c.slug,
+    imageUrl: c.imageUrl,
+    productCount: c._count.products,
+  }));
+}
+
+export type CategoryListRow = Awaited<ReturnType<typeof listCategoriesDetail>>[number];
+
+/** Single category for the edit page. */
+export async function getCategoryDetail(id: string) {
+  const c = await prisma.category.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      nameEn: true,
+      nameAr: true,
+      slug: true,
+      imageUrl: true,
+    },
+  });
+  return c;
+}
+
+export type CategoryDetail = NonNullable<Awaited<ReturnType<typeof getCategoryDetail>>>;
 
 /** Pricing tiers for the B2B price editor. */
 export async function listPricingTiers() {

@@ -5,13 +5,25 @@
   },
   "nav": {
     "sectionMain": "Workspace",
+    "section_store": "Store",
+    "section_marketing": "Marketing",
+    "section_finance": "Finance",
+    "section_admin": "Admin",
     "overview": "Overview & BI Analytics",
-    "content": "Content & App Layout",
-    "catalog": "Items & Catalog (B2B)",
-    "inventory": "Inventory & Warehouses",
     "orders": "Delivery & OMS",
+    "catalog": "Items & Catalog (B2B)",
+    "categories": "Categories",
+    "inventory": "Inventory & Warehouses",
+    "content": "Content & App Layout",
     "seo": "SEO Engine",
+    "coupons": "Coupons & Promotions",
+    "loyalty": "Loyalty Program",
     "financials": "Financials & VAT",
+    "reports": "Reports",
+    "customers": "Customers",
+    "staff": "Staff & Roles",
+    "shipping": "Shipping & Zones",
+    "reviews": "Reviews",
     "settings": "Settings & Integrations"
   },
   "shell": {
@@ -75,6 +87,10 @@
       "title": "Items & Catalog (B2B)",
       "description": "Manage products, variants, pricing tiers, and wholesale catalog structure."
     },
+    "categories": {
+      "title": "Categories",
+      "description": "Create and manage product categories used across the catalog."
+    },
     "inventory": {
       "title": "Inventory & Warehouses",
       "description": "Track stock levels, branches, and warehouse movements in real time."
@@ -94,6 +110,34 @@
     "settings": {
       "title": "Settings & Integrations",
       "description": "Configure workspaces, roles, and connections to external systems."
+    },
+    "reports": {
+      "title": "Reports",
+      "description": "Detailed sales, product, and customer reports with export to Excel."
+    },
+    "customers": {
+      "title": "Customers",
+      "description": "Browse and manage B2B salon accounts and B2C retail customers."
+    },
+    "coupons": {
+      "title": "Coupons & Promotions",
+      "description": "Create and manage discount codes and promotional campaigns."
+    },
+    "loyalty": {
+      "title": "Loyalty Program",
+      "description": "Configure loyalty tiers, point rules, and member rewards."
+    },
+    "staff": {
+      "title": "Staff & Roles",
+      "description": "Manage staff accounts, assign roles, and control portal access."
+    },
+    "shipping": {
+      "title": "Shipping & Zones",
+      "description": "Define shipping zones, carriers, and delivery fee rules."
+    },
+    "reviews": {
+      "title": "Reviews",
+      "description": "Moderate customer reviews and ratings on products."
     }
   },
   "orders": {
@@ -330,6 +374,7 @@
     "subtitle": "Manage products, variants, B2B pricing, and bulk-import your catalog.",
     "newProduct": "New product",
     "import": "Bulk import",
+    "categories": "Categories",
     "backToCatalog": "Back to catalog",
     "searchPlaceholder": "Search by name, brand, or SKU",
     "filters": {
@@ -381,6 +426,7 @@
       "category": "Category",
       "selectCategory": "Select a category",
       "basePrice": "Base price (SAR)",
+      "imageUrl": "Product image URL",
       "active": "Active",
       "activeHint": "Inactive products are hidden from ordering.",
       "addVariant": "Add variant",
@@ -426,6 +472,7 @@
         "variantInUse": "A variant can't be removed — it's referenced by an order. Deactivate the product instead.",
         "productInUse": "This product can't be deleted — it has orders. Deactivate it instead.",
         "hexInvalid": "Use a hex colour like #a8576b.",
+        "imageUrlInvalid": "Enter a valid image URL (must start with https://).",
         "tierRequired": "Choose a tier.",
         "moqMin": "MOQ must be at least 1.",
         "duplicateTier": "Each tier can appear once.",
@@ -618,6 +665,57 @@
       "unknown": "Something went wrong. Please try again."
     }
   },
+  "categories": {
+    "title": "Categories",
+    "subtitle": "Manage product categories and sub-categories.",
+    "newCategory": "New category",
+    "backToCategories": "Back to categories",
+    "table": {
+      "image": "Image",
+      "name": "Name",
+      "slug": "Slug",
+      "parent": "Parent",
+      "products": "Products"
+    },
+    "empty": {
+      "title": "No categories yet",
+      "body": "Create your first category so products have somewhere to live."
+    },
+    "form": {
+      "createTitle": "New category",
+      "editTitle": "Edit category",
+      "createSubtitle": "Add a new product category.",
+      "editSubtitle": "Update category details.",
+      "sectionDetails": "Category details",
+      "nameEn": "Name (English)",
+      "nameAr": "Name (Arabic)",
+      "slug": "Slug",
+      "slugHint": "Lowercase letters, numbers, and hyphens only (e.g. hair-care).",
+      "parentCategory": "Parent category",
+      "noParent": "None (top-level)",
+      "imageUrl": "Category image URL",
+      "save": "Save category",
+      "saving": "Saving…",
+      "saved": "Saved",
+      "create": "Create category",
+      "creating": "Creating…",
+      "delete": "Delete",
+      "deleting": "Deleting…",
+      "confirmDelete": "Delete this category? Products assigned to it will need a new category.",
+      "errors": {
+        "nameArRequired": "Arabic name is required.",
+        "nameEnRequired": "English name is required.",
+        "slugRequired": "Slug is required.",
+        "slugInvalid": "Use lowercase letters, numbers, and hyphens only.",
+        "slugTaken": "That slug is already in use.",
+        "imageUrlInvalid": "Enter a valid image URL (must start with https://).",
+        "selfParent": "A category can't be its own parent.",
+        "categoryInUse": "This category has products — reassign them before deleting.",
+        "notFound": "Category not found.",
+        "unknown": "Something went wrong. Please try again."
+      }
+    }
+  },
   "seo": {
     "title": "SEO Engine",
     "subtitle": "Optimise product metadata, manage redirects, and power the sitemap & structured data.",
@@ -738,6 +836,348 @@
       "qrHint": "Encoded per ZATCA QR spec v1.1 — scannable by any ZATCA-compliant app.",
       "showXml": "View UBL XML",
       "hideXml": "Hide XML"
+    }
+  },
+  "reports": {
+    "title": "Reports",
+    "subtitle": "Sales, product, and category reports with CSV export.",
+    "export": "Export CSV",
+    "empty": "No data for this range.",
+    "kpi": {
+      "grossSales": "Gross sales",
+      "netSales": "Net sales (ex-VAT)",
+      "vatCollected": "VAT collected",
+      "orders": "Orders",
+      "avgOrder": "Avg. order value",
+      "b2bSales": "B2B sales",
+      "b2cSales": "B2C sales",
+      "conversion": "Conversion"
+    },
+    "monthly": {
+      "title": "Monthly sales",
+      "subtitle": "Gross sales by channel, one row per month.",
+      "month": "Month",
+      "retail": "Retail",
+      "wholesale": "Wholesale",
+      "total": "Total"
+    },
+    "categories": {
+      "title": "Sales by category",
+      "subtitle": "Revenue and units per product category.",
+      "category": "Category",
+      "sales": "Sales",
+      "units": "Units"
+    },
+    "products": {
+      "title": "Top products",
+      "subtitle": "Best-selling products by net revenue.",
+      "product": "Product",
+      "brand": "Brand",
+      "sales": "Sales",
+      "units": "Units"
+    }
+  },
+  "customers": {
+    "title": "Customers",
+    "subtitle": "Browse B2B salon accounts and B2C retail customers, their loyalty status, and credit standing.",
+    "backToCustomers": "Back to customers",
+    "searchPlaceholder": "Search by name or phone",
+    "filters": {
+      "allTypes": "All types"
+    },
+    "type": {
+      "RETAIL": "Retail",
+      "B2B_SALON": "B2B Salon"
+    },
+    "table": {
+      "name": "Customer",
+      "type": "Type",
+      "city": "City",
+      "phone": "Phone",
+      "loyaltyPoints": "Loyalty points",
+      "pricingTier": "Pricing tier",
+      "credit": "Credit (balance / limit)"
+    },
+    "empty": {
+      "title": "No customers found",
+      "body": "No customers match your filters. Try clearing the search or the type filter."
+    },
+    "pagination": {
+      "showing": "Showing {count} of {total}",
+      "page": "Page {page} of {pageCount}",
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "creditType": {
+      "CHARGE": "Charge",
+      "PAYMENT": "Payment"
+    },
+    "detail": {
+      "customerSince": "Customer since {date}",
+      "contact": "Contact",
+      "crmNotes": "CRM notes",
+      "noNotes": "No notes on file.",
+      "loyalty": "Loyalty points",
+      "pricingTier": "Pricing tier",
+      "creditAccount": "Credit account",
+      "creditBalance": "Outstanding balance",
+      "creditLimit": "Credit limit",
+      "creditTransactions": "Credit transactions",
+      "noTransactions": "No credit transactions on file.",
+      "orderHistory": "Order history",
+      "noOrders": "No orders placed yet."
+    }
+  },
+  "staff": {
+    "title": "Staff & Roles",
+    "subtitle": "Manage staff accounts, roles, and access to the operations portal. Administrator access only.",
+    "filters": {
+      "allRoles": "All roles"
+    },
+    "roles": {
+      "ADMIN": "Administrator",
+      "MANAGER": "Operations Manager",
+      "B2B_SALON": "Salon Partner"
+    },
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "empty": {
+      "title": "No staff accounts found",
+      "body": "No staff accounts match your filters."
+    },
+    "pagination": {
+      "showing": "Showing {count} of {total}",
+      "page": "Page {page} of {pageCount}",
+      "prev": "Previous",
+      "next": "Next"
+    }
+  },
+  "shipping": {
+    "title": "Shipping & Zones",
+    "subtitle": "Track shipments across carriers and warehouses, and monitor delivery status at a glance.",
+    "filters": {
+      "allCarriers": "All carriers",
+      "allStatuses": "All statuses"
+    },
+    "carrier": {
+      "ARAMEX": "Aramex",
+      "SMSA": "SMSA",
+      "SPL": "SPL"
+    },
+    "status": {
+      "PENDING": "Pending",
+      "IN_TRANSIT": "In transit",
+      "DELIVERED": "Delivered",
+      "RETURNED": "Returned"
+    },
+    "table": {
+      "orderNumber": "Order #",
+      "warehouse": "Warehouse",
+      "carrier": "Carrier",
+      "waybill": "Waybill",
+      "date": "Date",
+      "status": "Status",
+      "unassigned": "Unassigned"
+    },
+    "warehouses": {
+      "shipments": "Shipments",
+      "stockCells": "Stock cells"
+    },
+    "empty": {
+      "title": "No shipments found",
+      "body": "No shipments match your filters. Try clearing the carrier or status filter."
+    },
+    "pagination": {
+      "showing": "Showing {count} of {total}",
+      "page": "Page {page} of {pageCount}",
+      "prev": "Previous",
+      "next": "Next"
+    }
+  },
+  "loyalty": {
+    "title": "Loyalty Program",
+    "subtitle": "A live view of member points — who holds them, how they're distributed, and who's leading.",
+    "kpi": {
+      "totalPoints": "Total points outstanding",
+      "totalMembers": "Total customers",
+      "activeMembers": "Members with points"
+    },
+    "type": {
+      "RETAIL": "Retail",
+      "B2B_SALON": "B2B Salon"
+    },
+    "leaderboard": {
+      "title": "Top members by points",
+      "rank": "#",
+      "member": "Member",
+      "type": "Type",
+      "city": "City",
+      "points": "Points",
+      "empty": "No members have earned loyalty points yet."
+    },
+    "distribution": {
+      "title": "Points distribution",
+      "zero": "No points",
+      "low": "1 – 100",
+      "mid": "101 – 500",
+      "high": "501 – 2,000",
+      "elite": "2,000+",
+      "hint": "Buckets count customers by their current loyalty point balance."
+    }
+  },
+  "coupons": {
+    "title": "Coupons & Promotions",
+    "subtitle": "Create and manage discount codes and promotional campaigns.",
+    "newCoupon": "New coupon",
+    "backToCoupons": "Back to coupons",
+    "stats": {
+      "total": "Total codes",
+      "active": "Active now",
+      "scheduled": "Scheduled",
+      "redemptions": "Redemptions",
+      "redemptionsHint": "across {count} orders"
+    },
+    "filter": {
+      "all": "All"
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "SCHEDULED": "Scheduled",
+      "EXPIRED": "Expired",
+      "DISABLED": "Disabled"
+    },
+    "table": {
+      "code": "Code",
+      "discount": "Discount",
+      "minOrder": "Min. order",
+      "usage": "Usage",
+      "unlimited": "unlimited",
+      "window": "Active window",
+      "status": "Status"
+    },
+    "pagination": {
+      "showing": "Showing {count} of {total} coupons",
+      "page": "Page {page} of {pageCount}",
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "empty": {
+      "title": "No coupons match these filters",
+      "body": "Try clearing the status filter to see every discount code and campaign on record."
+    },
+    "form": {
+      "createTitle": "New coupon",
+      "createSubtitle": "Set up a discount code with its rules and active window.",
+      "editTitle": "Edit coupon",
+      "sectionDetails": "Coupon details",
+      "code": "Code",
+      "description": "Description",
+      "descriptionPlaceholder": "Internal note shown alongside the code",
+      "status": "Status",
+      "type": "Discount type",
+      "typePercentage": "Percentage",
+      "typeFixedAmount": "Fixed amount",
+      "valuePercentage": "Discount (%)",
+      "valueFixed": "Discount (SAR)",
+      "minOrder": "Minimum order (SAR)",
+      "minOrderPlaceholder": "No minimum",
+      "usageLimit": "Usage limit",
+      "usageLimitPlaceholder": "Unlimited",
+      "startsAt": "Starts at",
+      "endsAt": "Ends at",
+      "endsAtHint": "Leave empty for a coupon that never expires.",
+      "create": "Create coupon",
+      "creating": "Creating…",
+      "save": "Save changes",
+      "saving": "Saving…",
+      "saved": "Coupon saved.",
+      "delete": "Delete coupon",
+      "deleting": "Deleting…",
+      "confirmDelete": "Delete this coupon? This cannot be undone.",
+      "errors": {
+        "codeRequired": "Code must be at least 3 characters.",
+        "codeInvalid": "Use only uppercase letters, numbers, hyphens, and underscores.",
+        "codeTaken": "This code is already in use.",
+        "valueInvalid": "Enter a valid non-negative amount.",
+        "percentageOutOfRange": "Percentage discounts must be 100 or less.",
+        "usageLimitInvalid": "Enter a whole number.",
+        "startsAtRequired": "Start date is required.",
+        "dateInvalid": "Enter a valid date.",
+        "endBeforeStart": "End date must be after the start date.",
+        "couponInUse": "This coupon is attached to orders and cannot be deleted.",
+        "notFound": "Coupon not found.",
+        "unknown": "Something went wrong. Please try again."
+      }
+    }
+  },
+  "reviews": {
+    "title": "Reviews",
+    "subtitle": "Moderate customer reviews and ratings on products.",
+    "stats": {
+      "total": "Total reviews",
+      "pending": "Awaiting moderation",
+      "approved": "Approved",
+      "average": "Average rating",
+      "averageHint": "out of 5 stars"
+    },
+    "breakdown": {
+      "title": "Rating breakdown"
+    },
+    "filter": {
+      "all": "All"
+    },
+    "status": {
+      "PENDING": "Pending",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected"
+    },
+    "byOn": "{name} reviewed {product} on {date}",
+    "pagination": {
+      "showing": "Showing {count} of {total} reviews",
+      "page": "Page {page} of {pageCount}",
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "empty": {
+      "title": "No reviews match these filters",
+      "body": "Try clearing the status or rating filter to see every review on record."
+    }
+  },
+  "settings": {
+    "integrations": {
+      "title": "Integrations & API connections",
+      "subtitle": "External services wired into the storefront, payments, tax, and shipping — placeholder credentials only.",
+      "enabledCount": "{count} of {total} enabled",
+      "placeholderNotice": "These are placeholder integration records seeded for the demo — no real credentials are stored. Real API keys and secrets will be wired in a later phase.",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "configured": "Configured",
+      "notConfigured": "Not set",
+      "apiKey": "API key",
+      "secret": "Secret",
+      "updated": "Updated",
+      "groups": {
+        "messaging": "Messaging",
+        "tax": "Tax & compliance",
+        "payments": "Payments",
+        "shipping": "Shipping carriers"
+      },
+      "keys": {
+        "meta_whatsapp": "WhatsApp Business (Meta)",
+        "zatca": "ZATCA e-invoicing",
+        "tabby": "Tabby",
+        "tamara": "Tamara",
+        "mada": "mada",
+        "aramex": "Aramex",
+        "smsa": "SMSA Express",
+        "spl": "Saudi Post (SPL)"
+      }
     }
   }
 }

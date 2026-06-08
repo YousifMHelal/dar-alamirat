@@ -10,7 +10,9 @@ import {
   PackagePlus,
   AlertTriangle,
   CheckCircle2,
+  ImageOff,
 } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Input, Label, FieldError } from "@/components/ui/input";
@@ -66,6 +68,7 @@ const ERROR_KEYS = [
   "variantInUse",
   "productInUse",
   "hexInvalid",
+  "imageUrlInvalid",
   "notFound",
   "unknown",
 ] as const;
@@ -103,6 +106,7 @@ export function ProductForm({
     sku: product?.sku ?? "",
     brand: product?.brand ?? "",
     basePrice: product?.basePrice ?? "",
+    imageUrl: product?.imageUrl ?? "",
     active: product?.active ?? true,
     categoryId: product?.categoryId ?? "",
   });
@@ -144,6 +148,7 @@ export function ProductForm({
       sku: form.sku,
       brand: form.brand,
       basePrice: form.basePrice,
+      imageUrl: form.imageUrl,
       active: form.active,
       categoryId: form.categoryId,
       variants: variants.map((v) => ({
@@ -262,6 +267,35 @@ export function ProductForm({
               dir="rtl"
               className={textareaClass}
             />
+          </div>
+          <div className="sm:col-span-2">
+            <Label htmlFor="imageUrl">{t("form.imageUrl")}</Label>
+            <div className="flex items-start gap-3">
+              <div className="min-w-0 flex-1">
+                <Input
+                  id="imageUrl"
+                  type="url"
+                  value={form.imageUrl}
+                  onChange={(e) => set("imageUrl", e.target.value)}
+                  placeholder="https://example.com/product.jpg"
+                  dir="ltr"
+                />
+              </div>
+              <div className="border-border bg-surface-muted/40 flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border">
+                {form.imageUrl && /^https?:\/\/.+/.test(form.imageUrl) ? (
+                  <Image
+                    src={form.imageUrl}
+                    alt=""
+                    width={64}
+                    height={64}
+                    className="size-full object-cover"
+                    unoptimized
+                  />
+                ) : (
+                  <ImageOff className="text-muted-foreground size-5" />
+                )}
+              </div>
+            </div>
           </div>
           <div className="sm:col-span-2">
             <label className="flex items-center gap-2.5">

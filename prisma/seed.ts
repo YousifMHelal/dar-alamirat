@@ -170,10 +170,12 @@ const nextBarcode = () => faker.string.numeric({ length: 13, allowLeadingZeros: 
  */
 async function clearAll() {
   // Children first, parents last.
+  await prisma.review.deleteMany();
   await prisma.payment.deleteMany();
   await prisma.shipment.deleteMany();
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
+  await prisma.coupon.deleteMany();
 
   await prisma.stockTransfer.deleteMany();
   await prisma.inventoryItem.deleteMany();
@@ -476,6 +478,110 @@ async function main() {
     }
   }
 
+  // ── Coupons (discount codes & campaigns) ───────────────────
+  const NOW = new Date("2026-06-01T00:00:00.000Z");
+  const couponSeeds = [
+    {
+      code: "WELCOME10",
+      description: "10% off a customer's first order",
+      type: "PERCENTAGE" as const,
+      value: D(10),
+      minOrder: D(100),
+      usageLimit: 500,
+      startsAt: new Date("2026-01-01T00:00:00.000Z"),
+      endsAt: null,
+      status: "ACTIVE" as const,
+    },
+    {
+      code: "RAMADAN25",
+      description: "Ramadan campaign — 25% off skincare & fragrance",
+      type: "PERCENTAGE" as const,
+      value: D(25),
+      minOrder: D(150),
+      usageLimit: 300,
+      startsAt: new Date("2026-02-15T00:00:00.000Z"),
+      endsAt: new Date("2026-03-20T00:00:00.000Z"),
+      status: "EXPIRED" as const,
+    },
+    {
+      code: "SAVE50",
+      description: "Flat SAR 50 off orders above SAR 400",
+      type: "FIXED_AMOUNT" as const,
+      value: D(50),
+      minOrder: D(400),
+      usageLimit: 200,
+      startsAt: new Date("2026-03-01T00:00:00.000Z"),
+      endsAt: null,
+      status: "ACTIVE" as const,
+    },
+    {
+      code: "B2BWHOLESALE5",
+      description: "Loyalty incentive for repeat B2B salon orders",
+      type: "PERCENTAGE" as const,
+      value: D(5),
+      minOrder: D(2000),
+      usageLimit: null,
+      startsAt: new Date("2026-01-01T00:00:00.000Z"),
+      endsAt: null,
+      status: "ACTIVE" as const,
+    },
+    {
+      code: "FLASH20",
+      description: "48-hour flash sale — 20% off storewide",
+      type: "PERCENTAGE" as const,
+      value: D(20),
+      minOrder: null,
+      usageLimit: 1000,
+      startsAt: new Date("2026-05-20T00:00:00.000Z"),
+      endsAt: new Date("2026-05-22T00:00:00.000Z"),
+      status: "EXPIRED" as const,
+    },
+    {
+      code: "EID2026",
+      description: "Eid promotion — SAR 30 off any order",
+      type: "FIXED_AMOUNT" as const,
+      value: D(30),
+      minOrder: D(120),
+      usageLimit: 400,
+      startsAt: new Date("2026-06-10T00:00:00.000Z"),
+      endsAt: new Date("2026-06-25T00:00:00.000Z"),
+      status: "SCHEDULED" as const,
+    },
+    {
+      code: "VIP15",
+      description: "Invite-only loyalty perk for top-tier customers",
+      type: "PERCENTAGE" as const,
+      value: D(15),
+      minOrder: D(300),
+      usageLimit: 150,
+      startsAt: new Date("2026-04-01T00:00:00.000Z"),
+      endsAt: null,
+      status: "DISABLED" as const,
+    },
+  ];
+
+  const coupons: { id: string; status: (typeof couponSeeds)[number]["status"] }[] = [];
+  for (const c of couponSeeds) {
+    const coupon = await prisma.coupon.create({
+      data: {
+        code: c.code,
+        description: c.description,
+        type: c.type,
+        value: c.value,
+        minOrder: c.minOrder,
+        usageLimit: c.usageLimit,
+        usageCount: 0, // bumped below as orders redeem the active codes
+        startsAt: c.startsAt,
+        endsAt: c.endsAt,
+        status: c.status,
+      },
+    });
+    coupons.push({ id: coupon.id, status: c.status });
+  }
+  // Only ACTIVE/EXPIRED codes could realistically have been redeemed by past orders.
+  const redeemableCoupons = coupons.filter((c) => c.status === "ACTIVE" || c.status === "EXPIRED");
+  const couponRedemptions = new Map<string, number>();
+
   // ── Orders, items, shipments, payments ─────────────────────
   const TARGET_ORDERS = 200;
   const orderStatuses = ["PENDING", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"] as const;
@@ -519,6 +625,10 @@ async function main() {
     // exercise the "needs routing" state.
     const assigned = chance(0.85) ? pick(warehouses) : null;
 
+    // ~18% of orders redeem one of the currently-redeemable coupon codes.
+    const redeemedCoupon = chance(0.18) ? pick(redeemableCoupons) : null;
+    if (redeemedCoupon) couponRedemptions.set(redeemedCoupon.id, (couponRedemptions.get(redeemedCoupon.id) ?? 0) + 1);
+
     const order = await prisma.order.create({
       data: {
         orderNumber: orderNumber(i + 1),
@@ -529,6 +639,7 @@ async function main() {
         vatAmount: D(Number(vatAmount)),
         total: D(Number(total)),
         assignedWarehouseId: assigned?.id ?? null,
+        couponId: redeemedCoupon?.id ?? null,
         placedAt,
         items: { createMany: { data: itemData } },
       },
@@ -596,6 +707,71 @@ async function main() {
         },
       });
     }
+  }
+
+  // Reflect actual redemptions back onto each coupon's usageCount.
+  for (const [couponId, count] of couponRedemptions) {
+    await prisma.coupon.update({ where: { id: couponId }, data: { usageCount: count } });
+  }
+
+  // ── Reviews (customer feedback on products, pending moderation queue) ──
+  const TARGET_REVIEWS = 120;
+  const reviewTitles = {
+    5: ["Absolutely love it!", "Holy grail product", "Will repurchase for sure", "Exceeded expectations", "My new favourite"],
+    4: ["Really good", "Happy with this", "Solid pick", "Works well for me", "Good value"],
+    3: ["It's okay", "Does the job", "Average, nothing special", "Decent but pricey", "Mixed feelings"],
+    2: ["Not what I expected", "Didn't work for my skin", "Disappointed", "Wouldn't buy again"],
+    1: ["Waste of money", "Arrived damaged", "Terrible experience", "Not as described"],
+  } satisfies Record<number, readonly string[]>;
+  const reviewBodies = {
+    5: [
+      "Been using this for a month now and the results speak for themselves. Fast shipping too.",
+      "Exactly as described, smells amazing, and a little goes a long way. Highly recommend to anyone in KSA.",
+      "This has become a staple in my routine. Packaging is premium and it feels authentic.",
+    ],
+    4: [
+      "Good quality for the price. Took a couple of weeks to see results but I'm satisfied overall.",
+      "Nice texture and scent. Only wish the bottle was a bit bigger for the price.",
+      "Works as expected, delivery was on time and the product matches the photos.",
+    ],
+    3: [
+      "It's fine — does what it says but I didn't notice anything special compared to similar products.",
+      "Average experience. The product is okay but the price feels a bit high for what you get.",
+      "Neither great nor bad. Might try a different variant next time.",
+    ],
+    2: [
+      "Caused a bit of irritation after a few uses, had to stop. Might just not suit my skin type.",
+      "The scent was too strong for my liking and it felt heavier than expected.",
+      "Took much longer to arrive than I hoped, and the seal was already broken.",
+    ],
+    1: [
+      "The box arrived crushed and the product had leaked everywhere. Very disappointed with the packaging.",
+      "Doesn't match the description at all — texture and scent are completely different from what's shown.",
+      "Used it for two weeks with zero results. Returning it.",
+    ],
+  } satisfies Record<number, readonly string[]>;
+  const reviewStatusByRating = (rating: number): "PENDING" | "APPROVED" | "REJECTED" => {
+    if (rating >= 4) return chance(0.75) ? "APPROVED" : "PENDING";
+    if (rating === 3) return pick(["PENDING", "APPROVED", "REJECTED"] as const);
+    return chance(0.55) ? "REJECTED" : "PENDING";
+  };
+
+  const reviewerIds = customers.map((c) => c.id);
+  for (let i = 0; i < TARGET_REVIEWS; i++) {
+    const rating = pick([5, 5, 4, 4, 4, 3, 3, 2, 1] as const); // weighted toward positive, like real storefronts
+    const productId = pick(allProductIds);
+    const customerId = pick(reviewerIds);
+    await prisma.review.create({
+      data: {
+        productId,
+        customerId,
+        rating,
+        title: chance(0.8) ? pick(reviewTitles[rating]) : null,
+        body: pick(reviewBodies[rating]),
+        status: reviewStatusByRating(rating),
+        createdAt: faker.date.between({ from: "2026-02-01T00:00:00.000Z", to: NOW }),
+      },
+    });
   }
 
   // ── Redirects (old Salla-style → new paths) ────────────────
@@ -693,6 +869,8 @@ async function main() {
       (o) => o._count.shipments > 1,
     ).length,
     payments: await prisma.payment.count(),
+    coupons: await prisma.coupon.count(),
+    reviews: await prisma.review.count(),
     redirects: await prisma.redirect.count(),
     seoMeta: await prisma.seoMeta.count(),
     settings: await prisma.setting.count(),

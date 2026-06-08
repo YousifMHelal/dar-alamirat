@@ -45,6 +45,7 @@ export const productSchema = z.object({
   sku: z.string().trim().min(1, "skuRequired").max(60),
   brand: z.string().trim().min(1, "brandRequired").max(120),
   basePrice: moneyString,
+  imageUrl: z.string().trim().url("imageUrlInvalid").optional().or(z.literal("")),
   active: z.boolean(),
   categoryId: z.string().cuid("categoryRequired"),
   // At least one variant — a product with no sellable variant can't be ordered.
@@ -74,3 +75,26 @@ export type ProductInput = z.infer<typeof productSchema>;
 export type UpdateProductInput = z.infer<typeof updateProductSchema>;
 export type TierPriceInput = z.infer<typeof tierPriceSchema>;
 export type SetTierPricesInput = z.infer<typeof setTierPricesSchema>;
+
+// ── Category schemas ──────────────────────────────────────────
+
+const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+export const categorySchema = z.object({
+  nameAr: z.string().trim().min(2, "nameArRequired").max(120),
+  nameEn: z.string().trim().min(2, "nameEnRequired").max(120),
+  slug: z
+    .string()
+    .trim()
+    .min(1, "slugRequired")
+    .max(80)
+    .regex(slugPattern, "slugInvalid"),
+  imageUrl: z.string().trim().url("imageUrlInvalid").optional().or(z.literal("")),
+});
+
+export const updateCategorySchema = categorySchema.extend({
+  id: z.string().cuid(),
+});
+
+export type CategoryInput = z.infer<typeof categorySchema>;
+export type UpdateCategoryInput = z.infer<typeof updateCategorySchema>;

@@ -6,9 +6,13 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/auth/session";
 import { toDecimal } from "@/lib/money";
 import {
+  categorySchema,
+  updateCategorySchema,
   productSchema,
   setTierPricesSchema,
   updateProductSchema,
+  type CategoryInput,
+  type UpdateCategoryInput,
   type ProductInput,
   type SetTierPricesInput,
   type UpdateProductInput,
@@ -61,6 +65,7 @@ export async function createProduct(input: ProductInput): Promise<ProductMutatio
         sku: d.sku,
         brand: d.brand,
         basePrice: toDecimal(d.basePrice),
+        imageUrl: orNull(d.imageUrl),
         active: d.active,
         categoryId: d.categoryId,
         variants: {
@@ -114,6 +119,7 @@ export async function updateProduct(input: UpdateProductInput): Promise<ProductM
           sku: d.sku,
           brand: d.brand,
           basePrice: toDecimal(d.basePrice),
+          imageUrl: orNull(d.imageUrl),
           active: d.active,
           categoryId: d.categoryId,
         },
@@ -223,6 +229,89 @@ export async function setTierPrices(input: SetTierPricesInput): Promise<DeleteRe
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
       return { ok: false, error: "duplicateTier" };
+    }
+    return { ok: false, error: "unknown" };
+  }
+}
+
+// ── Category mutations ────────────────────────────────────────
+
+export type CategoryMutationResult =
+  | { ok: true; categoryId: string }
+  | { ok: false; error: string };
+
+export async function createCategory(input: CategoryInput): Promise<CategoryMutationResult> {
+  await requireUser();
+  const parsed = categorySchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "invalid" };
+  }
+  const d = parsed.data;
+  try {
+    const category = await prisma.category.create({
+      data: {
+        nameAr: d.nameAr,
+        nameEn: d.nameEn,
+        slug: d.slug,
+        imageUrl: orNull(d.imageUrl),
+      },
+      select: { id: true },
+    });
+    revalidatePath("/catalog/categories");
+    revalidatePath("/catalog");
+    return { ok: true, categoryId: category.id };
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+      return { ok: false, error: "slugTaken" };
+    }
+    return { ok: false, error: "unknown" };
+  }
+}
+
+export async function updateCategory(input: UpdateCategoryInput): Promise<CategoryMutationResult> {
+  await requireUser();
+  const parsed = updateCategorySchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "invalid" };
+  }
+  const d = parsed.data;
+
+  const existing = await prisma.category.findUnique({ where: { id: d.id }, select: { id: true } });
+  if (!existing) return { ok: false, error: "notFound" };
+
+  try {
+    await prisma.category.update({
+      where: { id: d.id },
+      data: {
+        nameAr: d.nameAr,
+        nameEn: d.nameEn,
+        slug: d.slug,
+        imageUrl: orNull(d.imageUrl),
+      },
+    });
+    revalidatePath("/catalog/categories");
+    revalidatePath(`/catalog/categories/${d.id}`);
+    revalidatePath("/catalog");
+    return { ok: true, categoryId: d.id };
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+      return { ok: false, error: "slugTaken" };
+    }
+    return { ok: false, error: "unknown" };
+  }
+}
+
+export async function deleteCategory(id: string): Promise<DeleteResult> {
+  await requireUser();
+  if (!id) return { ok: false, error: "invalid" };
+  try {
+    await prisma.category.delete({ where: { id } });
+    revalidatePath("/catalog/categories");
+    revalidatePath("/catalog");
+    return { ok: true };
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2003") {
+      return { ok: false, error: "categoryInUse" };
     }
     return { ok: false, error: "unknown" };
   }

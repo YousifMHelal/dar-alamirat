@@ -189,7 +189,7 @@ export function LoginForm() {
               }))
             }
             className={cn(
-              "bg-surface text-foreground placeholder:text-muted-foreground h-11 w-full rounded-lg border px-3.5 pe-11 text-sm transition-colors outline-none",
+              "bg-surface text-foreground placeholder:text-muted-foreground h-11 w-full rounded-lg border px-3.5 pr-11 text-sm transition-colors outline-none",
               "focus-visible:ring-ring focus-visible:border-primary focus-visible:ring-2",
               "text-start",
               fieldErrors.password
@@ -202,7 +202,7 @@ export function LoginForm() {
             onClick={() => setShowPassword((s) => !s)}
             aria-label={showPassword ? t("hidePassword") : t("showPassword")}
             aria-pressed={showPassword}
-            className="text-muted-foreground hover:text-foreground focus-visible:ring-ring absolute inset-y-0 inset-e-0 right-0 flex w-11 items-center justify-center rounded-e-lg outline-none focus-visible:ring-2"
+            className="text-muted-foreground hover:text-foreground focus-visible:ring-ring absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-lg outline-none focus-visible:ring-2"
           >
             {showPassword ? (
               <EyeOff className="size-4" />
