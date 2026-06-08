@@ -11,6 +11,7 @@ import {
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/components/ui/toast";
 import { generateInvoiceForOrder } from "@/lib/financials/invoice";
 
 interface Props {
@@ -31,6 +32,7 @@ export function ZatcaPanel({ orders }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [showXml, setShowXml] = useState(false);
+  const { toast } = useToast();
 
   function handleGenerate() {
     if (!selectedOrderId) return;
@@ -40,8 +42,10 @@ export function ZatcaPanel({ orders }: Props) {
       const res = await generateInvoiceForOrder(selectedOrderId);
       if (res.ok) {
         setResult(res);
+        toast(t("generate") + " ✓", "success");
       } else {
         setError(res.error);
+        toast(res.error, "error");
       }
     });
   }

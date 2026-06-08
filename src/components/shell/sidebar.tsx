@@ -22,6 +22,7 @@ export function Sidebar({ moduleKeys }: { moduleKeys: readonly ModuleKey[] }) {
     <aside
       className={cn(
         "bg-sidebar border-sidebar-border hidden shrink-0 border-e lg:flex lg:flex-col",
+        "sticky top-0 h-dvh",
         "transition-[width] duration-300 ease-in-out",
         collapsed ? "w-[76px]" : "w-72",
       )}

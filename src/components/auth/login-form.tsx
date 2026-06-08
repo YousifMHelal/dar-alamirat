@@ -102,7 +102,10 @@ export function LoginForm() {
 
       {/* Email */}
       <div className="flex flex-col gap-1.5">
-        <label htmlFor={emailId} className="text-foreground text-sm font-medium">
+        <label
+          htmlFor={emailId}
+          className="text-foreground text-sm font-medium"
+        >
           {t("emailLabel")}
         </label>
         <input
@@ -133,7 +136,11 @@ export function LoginForm() {
           )}
         />
         {fieldErrors.email && (
-          <p id={`${emailId}-error`} role="alert" className="text-destructive text-xs">
+          <p
+            id={`${emailId}-error`}
+            role="alert"
+            className="text-destructive text-xs"
+          >
             {t(`errors.${fieldErrors.email}`)}
           </p>
         )}
@@ -141,7 +148,10 @@ export function LoginForm() {
 
       {/* Password */}
       <div className="flex flex-col gap-1.5">
-        <label htmlFor={passwordId} className="text-foreground text-sm font-medium">
+        <label
+          htmlFor={passwordId}
+          className="text-foreground text-sm font-medium"
+        >
           {t("passwordLabel")}
         </label>
         <div className="relative">
@@ -169,7 +179,9 @@ export function LoginForm() {
               "bg-surface text-foreground placeholder:text-muted-foreground h-11 w-full rounded-lg border px-3.5 pe-11 text-sm transition-colors outline-none",
               "focus-visible:ring-ring focus-visible:border-primary focus-visible:ring-2",
               "text-start",
-              fieldErrors.password ? "border-destructive" : "border-border-strong",
+              fieldErrors.password
+                ? "border-destructive"
+                : "border-border-strong",
             )}
           />
           <button
@@ -177,7 +189,7 @@ export function LoginForm() {
             onClick={() => setShowPassword((s) => !s)}
             aria-label={showPassword ? t("hidePassword") : t("showPassword")}
             aria-pressed={showPassword}
-            className="text-muted-foreground hover:text-foreground focus-visible:ring-ring absolute inset-y-0 end-0 flex w-11 items-center justify-center rounded-e-lg outline-none focus-visible:ring-2"
+            className="text-muted-foreground hover:text-foreground focus-visible:ring-ring absolute inset-y-0 inset-e-0 right-0 flex w-11 items-center justify-center rounded-e-lg outline-none focus-visible:ring-2"
           >
             {showPassword ? (
               <EyeOff className="size-4" />
@@ -187,13 +199,22 @@ export function LoginForm() {
           </button>
         </div>
         {fieldErrors.password && (
-          <p id={`${passwordId}-error`} role="alert" className="text-destructive text-xs">
+          <p
+            id={`${passwordId}-error`}
+            role="alert"
+            className="text-destructive text-xs"
+          >
             {t(`errors.${fieldErrors.password}`)}
           </p>
         )}
       </div>
 
-      <Button type="submit" size="lg" disabled={isPending} className="mt-1 w-full">
+      <Button
+        type="submit"
+        size="lg"
+        disabled={isPending}
+        className="mt-1 w-full"
+      >
         {isPending ? (
           <>
             <Loader2 className="size-4 animate-spin" />

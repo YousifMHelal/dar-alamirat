@@ -16,6 +16,7 @@ import { formatNumber } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/components/ui/toast";
 import {
   createTransfer,
   updateTransferStatus,
@@ -157,6 +158,7 @@ function TransferRowView({
 }) {
   const [isSaving, startSave] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
   const status = transfer.status as Status;
   const pname = locale === "ar" ? transfer.variant.product.nameAr : transfer.variant.product.nameEn;
   const attrs = [transfer.variant.capacity, transfer.variant.colorName].filter(Boolean).join(" · ");
@@ -165,8 +167,14 @@ function TransferRowView({
     setError(null);
     startSave(async () => {
       const res = await updateTransferStatus({ transferId: transfer.id, status: "COMPLETED" });
-      if (res.ok) onChanged();
-      else setError(tErr(res.error));
+      if (res.ok) {
+        onChanged();
+        toast(label("status_COMPLETED"), "success");
+      } else {
+        const msg = tErr(res.error);
+        setError(msg);
+        toast(msg, "error");
+      }
     });
   };
 
@@ -222,6 +230,7 @@ function CreateTransferForm({
   onCancel: () => void;
 }) {
   const t = useTranslations("inventory.transfers");
+  const { toast } = useToast();
   const [variant, setVariant] = useState<TransferVariantOption | null>(null);
   const [fromWarehouseId, setFrom] = useState("");
   const [toWarehouseId, setTo] = useState("");
@@ -241,8 +250,14 @@ function CreateTransferForm({
         quantity: Number(quantity) || 0,
         status,
       });
-      if (res.ok) onDone();
-      else setError(tErr(res.error));
+      if (res.ok) {
+        toast(t("create") + " ✓", "success");
+        onDone();
+      } else {
+        const msg = tErr(res.error);
+        setError(msg);
+        toast(msg, "error");
+      }
     });
   };
 

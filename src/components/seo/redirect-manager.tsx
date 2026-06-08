@@ -16,6 +16,7 @@ import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/components/ui/toast";
 import { saveRedirect, deleteRedirect, importRedirects } from "@/lib/seo/actions";
 import type { RedirectRow } from "@/lib/seo/queries";
 
@@ -137,13 +138,14 @@ function RedirectRowView({
 }) {
   const [isBusy, startBusy] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const toggleActive = () => {
     setError(null);
     startBusy(async () => {
       const res = await saveRedirect({ ...row, active: !row.active });
       if (res.ok) onChanged();
-      else setError(tErr(res.error));
+      else { const m = tErr(res.error); setError(m); toast(m, "error"); }
     });
   };
   const onDelete = () => {
@@ -152,7 +154,7 @@ function RedirectRowView({
     startBusy(async () => {
       const res = await deleteRedirect(row.id);
       if (res.ok) onChanged();
-      else setError(tErr(res.error));
+      else { const m = tErr(res.error); setError(m); toast(m, "error"); }
     });
   };
 
@@ -215,6 +217,7 @@ function RedirectForm({
   onCancel: () => void;
 }) {
   const t = useTranslations("seo.redirects");
+  const { toast } = useToast();
   const [fromPath, setFromPath] = useState("");
   const [toPath, setToPath] = useState("");
   const [type, setType] = useState<RType>("PERMANENT_301");
@@ -225,8 +228,8 @@ function RedirectForm({
     setError(null);
     startSave(async () => {
       const res = await saveRedirect({ fromPath, toPath, type, active: true });
-      if (res.ok) onDone();
-      else setError(tErr(res.error));
+      if (res.ok) { toast(t("save") + " ✓", "success"); onDone(); }
+      else { const m = tErr(res.error); setError(m); toast(m, "error"); }
     });
   };
 
@@ -282,6 +285,7 @@ function ImportPanel({
   onClose: () => void;
 }) {
   const t = useTranslations("seo.redirects");
+  const { toast } = useToast();
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<{ created: number; skipped: number } | null>(null);
@@ -313,9 +317,12 @@ function ImportPanel({
       const res = await importRedirects({ redirects: rows });
       if (res.ok) {
         setResult({ created: res.created, skipped: res.skipped });
+        toast(t("imported", { created: res.created, skipped: res.skipped }), "success");
         onDone();
       } else {
-        setError(tErr(res.error));
+        const m = tErr(res.error);
+        setError(m);
+        toast(m, "error");
       }
     });
   };

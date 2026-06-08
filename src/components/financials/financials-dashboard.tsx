@@ -50,7 +50,7 @@ export async function FinancialsDashboard({ locale }: { locale: Locale }) {
       {/* Two-column layout for the two main panels */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Tabby + Tamara reconciliation */}
-        <ReconciliationPanel initial={lastReconciliation} />
+        <ReconciliationPanel initial={lastReconciliation} locale={locale} />
 
         {/* ZATCA invoice generation */}
         <ZatcaPanel orders={recentOrders} />

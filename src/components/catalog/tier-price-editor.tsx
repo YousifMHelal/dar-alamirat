@@ -6,6 +6,7 @@ import { Plus, Trash2, Loader2, Save, AlertTriangle, CheckCircle2 } from "lucide
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
+import { useToast } from "@/components/ui/toast";
 import { setTierPrices } from "@/lib/catalog/actions";
 
 /**
@@ -36,6 +37,7 @@ export function TierPriceEditor({
 }) {
   const t = useTranslations("catalog");
   const router = useRouter();
+  const { toast } = useToast();
   const [rows, setRows] = useState<Row[]>(
     initial.map((tp) => ({
       id: tp.id,
@@ -70,12 +72,15 @@ export function TierPriceEditor({
       });
       if (res.ok) {
         setSaved(true);
+        toast(t("form.pricingSaved"), "success");
         router.refresh();
       } else {
         const key: ErrorKey = (ERROR_KEYS as readonly string[]).includes(res.error)
           ? (res.error as ErrorKey)
           : "unknown";
-        setError(t(`form.errors.${key}` as const));
+        const msg = t(`form.errors.${key}` as const);
+        setError(msg);
+        toast(msg, "error");
       }
     });
   };

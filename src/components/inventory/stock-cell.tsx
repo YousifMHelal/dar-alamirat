@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Check, Loader2, Pencil, X } from "lucide-react";
 import { formatNumber } from "@/lib/format";
 import { editStock } from "@/lib/inventory/actions";
+import { useToast } from "@/components/ui/toast";
 import type { StockCell as Cell } from "@/lib/inventory/queries";
 
 /**
@@ -26,6 +27,7 @@ export function StockCellEditor({
   cell: Cell;
 }) {
   const t = useTranslations("inventory.matrix");
+  const { toast } = useToast();
   const [editing, setEditing] = useState(false);
   const [qty, setQty] = useState(cell.quantityOnHand);
   const [reorder, setReorder] = useState(cell.reorderLevel);
@@ -51,6 +53,7 @@ export function StockCellEditor({
         setDisplay({ quantityOnHand: res.quantityOnHand, reorderLevel: res.reorderLevel });
         setEditing(false);
         setJustSaved(true);
+        toast(t("saved"), "success");
         window.setTimeout(() => setJustSaved(false), 1500);
       }
     });

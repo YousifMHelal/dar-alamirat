@@ -33,13 +33,25 @@ export default async function DashboardLayout({
 
   return (
     <SidebarProvider>
+      {/* Skip link for keyboard users — visually hidden until focused. */}
+      <a
+        href="#main-content"
+        className="bg-primary text-primary-foreground fixed inset-s-2 top-2 z-300 -translate-y-16 rounded-lg px-4 py-2 text-sm font-medium transition-transform focus:translate-y-0 focus:outline-none"
+      >
+        {locale === "ar" ? "انتقل إلى المحتوى" : "Skip to content"}
+      </a>
+
       <div className="bg-background flex min-h-dvh">
         <Sidebar moduleKeys={navModules} />
         <MobileDrawer moduleKeys={navModules} />
 
         <div className="flex min-w-0 flex-1 flex-col">
           <Topbar user={user} locale={locale} />
-          <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+          <main
+            id="main-content"
+            tabIndex={-1}
+            className="flex-1 px-4 py-6 outline-none sm:px-6 lg:px-8 lg:py-8"
+          >
             <div className="mx-auto w-full max-w-6xl">{children}</div>
           </main>
         </div>

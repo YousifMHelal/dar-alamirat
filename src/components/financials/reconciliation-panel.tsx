@@ -11,6 +11,7 @@ import {
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/components/ui/toast";
 import { runReconciliation } from "@/lib/financials/reconciliation";
 import type { ReconciliationSummary, ReconciliationLine } from "@/lib/financials/reconciliation";
 
@@ -18,8 +19,9 @@ interface Props {
   initial: ReconciliationSummary | null;
 }
 
-export function ReconciliationPanel({ initial }: Props) {
+export function ReconciliationPanel({ initial, locale }: Props & { locale?: string }) {
   const t = useTranslations("financials.reconciliation");
+  const { toast } = useToast();
   const [summary, setSummary] = useState<ReconciliationSummary | null>(initial);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -30,8 +32,10 @@ export function ReconciliationPanel({ initial }: Props) {
       const res = await runReconciliation();
       if (res.ok) {
         setSummary(res.summary);
+        toast(t("matched") + ": " + res.summary.matched, "success");
       } else {
         setError(res.error);
+        toast(res.error, "error");
       }
     });
   }
@@ -104,7 +108,7 @@ export function ReconciliationPanel({ initial }: Props) {
 
           <p className="text-muted-foreground text-xs">
             {t("lastRun")}:{" "}
-            {new Intl.DateTimeFormat("en-GB", {
+            {new Intl.DateTimeFormat(locale === "ar" ? "ar-SA" : "en-GB", {
               dateStyle: "medium",
               timeStyle: "short",
             }).format(new Date(summary.runAt))}
@@ -157,25 +161,26 @@ function ReconciliationTable({ lines }: { lines: ReconciliationLine[] }) {
 
   return (
     <div className="border-border overflow-hidden rounded-xl border">
-      <table className="w-full text-sm">
+      <div className="scrollbar-subtle overflow-x-auto">
+      <table className="w-full min-w-180 text-sm">
         <thead className="bg-muted/50 border-border border-b">
           <tr>
-            <th className="text-muted-foreground px-4 py-3 text-left text-xs font-medium">
+            <th className="text-muted-foreground px-4 py-3 text-start text-xs font-medium">
               {t("order")}
             </th>
-            <th className="text-muted-foreground px-4 py-3 text-left text-xs font-medium">
+            <th className="text-muted-foreground px-4 py-3 text-start text-xs font-medium">
               {t("gateway")}
             </th>
-            <th className="text-muted-foreground px-4 py-3 text-right text-xs font-medium">
+            <th className="text-muted-foreground px-4 py-3 text-end text-xs font-medium">
               {t("gross")}
             </th>
-            <th className="text-muted-foreground px-4 py-3 text-right text-xs font-medium">
+            <th className="text-muted-foreground px-4 py-3 text-end text-xs font-medium">
               {t("fee")}
             </th>
-            <th className="text-muted-foreground px-4 py-3 text-right text-xs font-medium">
+            <th className="text-muted-foreground px-4 py-3 text-end text-xs font-medium">
               {t("net")}
             </th>
-            <th className="text-muted-foreground px-4 py-3 text-left text-xs font-medium">
+            <th className="text-muted-foreground px-4 py-3 text-start text-xs font-medium">
               {t("status")}
             </th>
           </tr>
@@ -189,7 +194,7 @@ function ReconciliationTable({ lines }: { lines: ReconciliationLine[] }) {
                   {line.gateway}
                 </Badge>
               </td>
-              <td className="text-foreground px-4 py-3 text-right tabular-nums">
+              <td className="text-foreground px-4 py-3 text-end tabular-nums">
                 {line.amountMismatch ? (
                   <span className="text-destructive font-semibold">
                     {line.amount} ⚠
@@ -198,10 +203,10 @@ function ReconciliationTable({ lines }: { lines: ReconciliationLine[] }) {
                   line.amount
                 )}
               </td>
-              <td className="text-muted-foreground px-4 py-3 text-right tabular-nums">
+              <td className="text-muted-foreground px-4 py-3 text-end tabular-nums">
                 {line.gatewayFee}
               </td>
-              <td className="text-foreground px-4 py-3 text-right tabular-nums font-medium">
+              <td className="text-foreground px-4 py-3 text-end tabular-nums font-medium">
                 {line.netAmount}
               </td>
               <td className="px-4 py-3">
@@ -219,6 +224,7 @@ function ReconciliationTable({ lines }: { lines: ReconciliationLine[] }) {
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

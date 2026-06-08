@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
+import { useToast } from "@/components/ui/toast";
 import { saveAppLayout } from "@/lib/content/actions";
 import type { LayoutBlock, StoryItem } from "@/lib/content/schema";
 import { useReorder, moveItem } from "./use-reorder";
@@ -62,6 +63,7 @@ export function LayoutBuilder({
   const t = useTranslations("content.layout");
   const tc = useTranslations("content.common");
   const tErr = useTranslations("content.errors");
+  const { toast } = useToast();
   const [blocks, setBlocks] = useState<LayoutBlock[]>(initial);
   const [dirty, setDirty] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -88,12 +90,15 @@ export function LayoutBuilder({
       if (res.ok) {
         setDirty(false);
         setSaved(true);
+        toast(tc("saved"), "success");
         window.setTimeout(() => setSaved(false), 2000);
       } else {
         const key: ErrorKey = (ERROR_KEYS as readonly string[]).includes(res.error)
           ? (res.error as ErrorKey)
           : "unknown";
-        setError(tErr(key));
+        const msg = tErr(key);
+        setError(msg);
+        toast(msg, "error");
       }
     });
   };

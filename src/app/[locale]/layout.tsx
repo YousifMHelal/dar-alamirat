@@ -5,6 +5,7 @@ import { setRequestLocale } from "next-intl/server";
 import { inter, playfair, plexArabic } from "@/lib/fonts";
 import { getDirection, routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
+import { ToastProvider } from "@/components/ui/toast";
 import "../globals.css";
 
 export const metadata: Metadata = {
@@ -53,7 +54,9 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} dir={dir} className={fontVars} suppressHydrationWarning>
       <body className="font-sans antialiased">
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

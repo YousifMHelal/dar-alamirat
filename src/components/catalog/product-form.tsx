@@ -14,6 +14,7 @@ import {
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Input, Label, FieldError } from "@/components/ui/input";
+import { useToast } from "@/components/ui/toast";
 import {
   createProduct,
   updateProduct,
@@ -91,6 +92,7 @@ export function ProductForm({
 }) {
   const t = useTranslations("catalog");
   const router = useRouter();
+  const { toast } = useToast();
   const isEdit = Boolean(product);
 
   const [form, setForm] = useState({
@@ -163,12 +165,15 @@ export function ProductForm({
       if (res.ok) {
         if (isEdit) {
           setSaved(true);
+          toast(t("form.saved"), "success");
           router.refresh();
         } else {
           router.push(`/catalog/${res.productId}`);
         }
       } else {
-        setError(translateError(t, res.error));
+        const msg = translateError(t, res.error);
+        setError(msg);
+        toast(msg, "error");
       }
     });
   };

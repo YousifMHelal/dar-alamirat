@@ -6,6 +6,7 @@ import { Loader2, Save, CheckCircle2, AlertTriangle, ArrowLeft, Code2 } from "lu
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
+import { useToast } from "@/components/ui/toast";
 import { saveProductSeo } from "@/lib/seo/actions";
 import type { ProductSeoDetail } from "@/lib/seo/queries";
 
@@ -37,6 +38,7 @@ export function MetaEditor({
   const t = useTranslations("seo.meta");
   const tErr = useTranslations("seo.errors");
   const router = useRouter();
+  const { toast } = useToast();
 
   const [metaTitle, setMetaTitle] = useState(product.meta?.metaTitle ?? `${product.nameEn} | Dar Al-Amirat`);
   const [metaDescription, setMetaDescription] = useState(product.meta?.metaDescription ?? "");
@@ -73,13 +75,16 @@ export function MetaEditor({
       });
       if (res.ok) {
         setSaved(true);
+        toast(t("saved"), "success");
         router.refresh();
         window.setTimeout(() => setSaved(false), 2000);
       } else {
         const key: ErrorKey = (ERROR_KEYS as readonly string[]).includes(res.error)
           ? (res.error as ErrorKey)
           : "unknown";
-        setError(tErr(key));
+        const msg = tErr(key);
+        setError(msg);
+        toast(msg, "error");
       }
     });
   };
