@@ -8,6 +8,7 @@ import {
   getStockMatrix,
   countLowStock,
   listWarehouses,
+  listWarehousesFull,
   listTransfers,
   listPurchaseOrders,
   type PurchaseOrderRow,
@@ -19,6 +20,7 @@ import { CatalogHeader } from "@/components/catalog/page-header";
 import { MatrixToolbar } from "@/components/inventory/matrix-toolbar";
 import { StockCellEditor } from "@/components/inventory/stock-cell";
 import { TransfersPanel } from "@/components/inventory/transfers-panel";
+import { WarehousesPanel } from "@/components/inventory/warehouses-panel";
 
 const MODULE_KEY = "inventory";
 
@@ -46,7 +48,10 @@ export default async function InventoryPage({
   const sp = await searchParams;
   const t = await getTranslations({ locale, namespace: "inventory" });
   const tab =
-    sp.tab === "transfers" ? "transfers" : sp.tab === "po" ? "po" : "matrix";
+    sp.tab === "transfers" ? "transfers"
+    : sp.tab === "po" ? "po"
+    : sp.tab === "warehouses" ? "warehouses"
+    : "matrix";
 
   const search = sp.q ?? "";
   const lowStockOnly = sp.low === "1";
@@ -82,6 +87,7 @@ export default async function InventoryPage({
         <TabLink href="/inventory?tab=matrix" active={tab === "matrix"} label={t("tabs.matrix")} />
         <TabLink href="/inventory?tab=transfers" active={tab === "transfers"} label={t("tabs.transfers")} />
         <TabLink href="/inventory?tab=po" active={tab === "po"} label={t("tabs.purchaseOrders")} />
+        <TabLink href="/inventory?tab=warehouses" active={tab === "warehouses"} label={t("tabs.warehouses")} />
       </div>
 
       {tab === "matrix" && (
@@ -98,6 +104,7 @@ export default async function InventoryPage({
         <TransfersPanel locale={locale} warehouses={warehouses} transfers={await listTransfers()} />
       )}
       {tab === "po" && <PurchaseOrdersTab locale={locale} rows={await listPurchaseOrders()} />}
+      {tab === "warehouses" && <WarehousesPanel warehouses={await listWarehousesFull()} />}
     </div>
   );
 }

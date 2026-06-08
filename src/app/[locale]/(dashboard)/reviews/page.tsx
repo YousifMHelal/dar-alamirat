@@ -112,7 +112,7 @@ export default async function ReviewsPage({
     {
       icon: Star,
       label: t("stats.average"),
-      value: stats.averageRating.toFixed(1),
+      value: formatNumber(parseFloat(stats.averageRating.toFixed(1)), locale),
       meta: t("stats.averageHint"),
       tone: "info" as const,
     },

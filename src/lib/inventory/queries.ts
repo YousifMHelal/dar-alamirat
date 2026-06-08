@@ -51,11 +51,31 @@ export interface StockRow {
   anyLow: boolean;
 }
 
+export interface WarehouseRow extends WarehouseColumn {
+  _count: { inventoryItems: number };
+  createdAt: Date;
+}
+
 /** The 4 warehouses, in a stable display order. */
 export async function listWarehouses(): Promise<WarehouseColumn[]> {
   return prisma.warehouse.findMany({
     orderBy: { code: "asc" },
     select: { id: true, name: true, code: true, city: true },
+  });
+}
+
+/** Full warehouse rows for the management panel. */
+export async function listWarehousesFull(): Promise<WarehouseRow[]> {
+  return prisma.warehouse.findMany({
+    orderBy: { code: "asc" },
+    select: {
+      id: true,
+      name: true,
+      code: true,
+      city: true,
+      createdAt: true,
+      _count: { select: { inventoryItems: true } },
+    },
   });
 }
 

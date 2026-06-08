@@ -7,9 +7,15 @@ import {
   createTransferSchema,
   updateStockSchema,
   updateTransferStatusSchema,
+  warehouseSchema,
+  updateWarehouseSchema,
+  deleteWarehouseSchema,
   type CreateTransferInput,
   type UpdateStockInput,
   type UpdateTransferStatusInput,
+  type CreateWarehouseInput,
+  type UpdateWarehouseInput,
+  type DeleteWarehouseInput,
 } from "./schema";
 import type { TransferVariantOption } from "./queries";
 
@@ -161,6 +167,61 @@ export async function updateTransferStatus(
   } catch (e) {
     if (e instanceof InsufficientStock) return { ok: false, error: "insufficientStock" };
     if (e instanceof NotFound) return { ok: false, error: "notFound" };
+    return { ok: false, error: "unknown" };
+  }
+}
+
+// ── Warehouse CRUD ─────────────────────────────────────────────
+
+export type WarehouseResult =
+  | { ok: true; id: string }
+  | { ok: false; error: string };
+
+export async function createWarehouse(input: CreateWarehouseInput): Promise<WarehouseResult> {
+  await requireUser();
+  const parsed = warehouseSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "invalid" };
+  }
+  try {
+    const wh = await prisma.warehouse.create({ data: { ...parsed.data, latitude: 0, longitude: 0 }, select: { id: true } });
+    revalidatePath("/inventory");
+    return { ok: true, id: wh.id };
+  } catch (e: unknown) {
+    if ((e as { code?: string }).code === "P2002") return { ok: false, error: "codeTaken" };
+    return { ok: false, error: "unknown" };
+  }
+}
+
+export async function updateWarehouse(input: UpdateWarehouseInput): Promise<WarehouseResult> {
+  await requireUser();
+  const parsed = updateWarehouseSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "invalid" };
+  }
+  const { id, ...data } = parsed.data;
+  try {
+    await prisma.warehouse.update({ where: { id }, data });
+    revalidatePath("/inventory");
+    return { ok: true, id };
+  } catch (e: unknown) {
+    if ((e as { code?: string }).code === "P2002") return { ok: false, error: "codeTaken" };
+    if ((e as { code?: string }).code === "P2025") return { ok: false, error: "notFound" };
+    return { ok: false, error: "unknown" };
+  }
+}
+
+export async function deleteWarehouse(input: DeleteWarehouseInput): Promise<WarehouseResult> {
+  await requireUser();
+  const parsed = deleteWarehouseSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "invalid" };
+  try {
+    await prisma.warehouse.delete({ where: { id: parsed.data.id } });
+    revalidatePath("/inventory");
+    return { ok: true, id: parsed.data.id };
+  } catch (e: unknown) {
+    if ((e as { code?: string }).code === "P2025") return { ok: false, error: "notFound" };
+    if ((e as { code?: string }).code === "P2003") return { ok: false, error: "hasStock" };
     return { ok: false, error: "unknown" };
   }
 }

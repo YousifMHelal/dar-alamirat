@@ -5,10 +5,13 @@
   },
   "nav": {
     "sectionMain": "Workspace",
-    "section_store": "Store",
+    "section_overview": "Overview",
+    "section_orders": "Orders",
+    "section_catalog": "Products",
     "section_marketing": "Marketing",
-    "section_finance": "Finance",
-    "section_admin": "Admin",
+    "section_customers": "Customers",
+    "section_finance": "Reports",
+    "section_system": "System",
     "overview": "Overview & BI Analytics",
     "orders": "Delivery & OMS",
     "catalog": "Items & Catalog (B2B)",
@@ -24,7 +27,13 @@
     "staff": "Staff & Roles",
     "shipping": "Shipping & Zones",
     "reviews": "Reviews",
-    "settings": "Settings & Integrations"
+    "settings": "Settings & Integrations",
+    "abandonedCarts": "Abandoned Carts",
+    "importExport": "Import & Export",
+    "giftCards": "Gift Cards",
+    "performance": "Store Performance",
+    "notifications": "Notifications",
+    "support": "Help Center & Support"
   },
   "shell": {
     "collapseSidebar": "Collapse sidebar",
@@ -138,6 +147,30 @@
     "reviews": {
       "title": "Reviews",
       "description": "Moderate customer reviews and ratings on products."
+    },
+    "abandonedCarts": {
+      "title": "Abandoned Carts",
+      "description": "Track checkout drop-offs and recover lost sales with reminders."
+    },
+    "importExport": {
+      "title": "Import & Export Products",
+      "description": "Bulk-import or export your catalog as Excel spreadsheets."
+    },
+    "giftCards": {
+      "title": "Gift Cards",
+      "description": "Issue, track, and redeem store gift cards and balances."
+    },
+    "performance": {
+      "title": "Store Performance",
+      "description": "Analyse revenue trends, conversion, top products, and retention."
+    },
+    "notifications": {
+      "title": "Notifications Center",
+      "description": "Stay on top of orders, inventory, reviews, and system alerts."
+    },
+    "support": {
+      "title": "Help Center & Support",
+      "description": "Track and respond to customer support tickets in one place."
     }
   },
   "orders": {
@@ -527,6 +560,65 @@
         "skuConflict": "Rows with this SKU have conflicting product details.",
         "importRowFailed": "Row failed to import.",
         "unknown": "Something went wrong."
+      },
+      "backToImportExport": "Back to import & export"
+    },
+    "importExportPage": {
+      "title": "Import & Export Products",
+      "subtitle": "Bulk-update your catalog and review the history of every import and export job.",
+      "startImport": "Start import",
+      "stats": {
+        "totalImports": "Total imports",
+        "totalExports": "Total exports",
+        "failedJobs": "Failed jobs",
+        "lastJob": "Last job"
+      },
+      "filter": {
+        "all": "All"
+      },
+      "type": {
+        "IMPORT": "Import",
+        "EXPORT": "Export"
+      },
+      "status": {
+        "PENDING": "Pending",
+        "PROCESSING": "Processing",
+        "COMPLETED": "Completed",
+        "FAILED": "Failed"
+      },
+      "table": {
+        "fileName": "File",
+        "type": "Type",
+        "status": "Status",
+        "rowCount": "Rows",
+        "createdBy": "Run by",
+        "createdAt": "Date"
+      },
+      "pagination": {
+        "showing": "Showing {count} of {total} jobs",
+        "page": "Page {page} of {pageCount}",
+        "prev": "Previous",
+        "next": "Next"
+      },
+      "empty": {
+        "title": "No import or export jobs yet",
+        "body": "Start a bulk import or export your catalog to see the job history here."
+      },
+      "export": {
+        "title": "Export catalog",
+        "subtitle": "Download your products and variants as an Excel (.xlsx) file.",
+        "category": "Category",
+        "allCategories": "All categories",
+        "status": "Status",
+        "allStatuses": "All statuses",
+        "activeOnly": "Active only",
+        "inactiveOnly": "Inactive only",
+        "download": "Export to Excel",
+        "exporting": "Preparing export…"
+      },
+      "exportStarted": "Your export is downloading.",
+      "errors": {
+        "unknown": "Something went wrong. Please try again."
       }
     }
   },
@@ -536,7 +628,8 @@
     "tabs": {
       "matrix": "Stock matrix",
       "transfers": "Transfers",
-      "purchaseOrders": "Purchase orders"
+      "purchaseOrders": "Purchase orders",
+      "warehouses": "Warehouses"
     },
     "kpi": {
       "variants": "Variants tracked",
@@ -608,6 +701,50 @@
       "status_RECEIVED": "Received",
       "status_CANCELLED": "Cancelled",
       "noDate": "—"
+    },
+    "warehouses": {
+      "title": "Warehouses",
+      "add": "Add warehouse",
+      "addTitle": "Add warehouse",
+      "editTitle": "Edit warehouse",
+      "deleteTitle": "Delete warehouse",
+      "deleteConfirm": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
+      "deleteHasStock": "This warehouse has {count} SKU rows. All inventory data will be deleted too.",
+      "empty": "No warehouses yet. Add your first warehouse to start tracking inventory.",
+      "createBtn": "Create warehouse",
+      "saveBtn": "Save changes",
+      "deleteBtn": "Delete warehouse",
+      "deleting": "Deleting…",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "createdToast": "Warehouse created.",
+      "updatedToast": "Warehouse updated.",
+      "deletedToast": "Warehouse deleted.",
+      "editAriaLabel": "Edit {name}",
+      "deleteAriaLabel": "Delete {name}",
+      "col": {
+        "name": "Name",
+        "code": "Code",
+        "city": "City",
+        "skus": "SKUs"
+      },
+      "field": {
+        "name": "Name",
+        "namePlaceholder": "Riyadh Main",
+        "code": "Code",
+        "city": "City",
+        "cityPlaceholder": "Riyadh"
+      }
+    },
+    "warehouseErrors": {
+      "nameRequired": "Name is required.",
+      "codeRequired": "Code is required.",
+      "cityRequired": "City is required.",
+      "codeTaken": "That warehouse code is already in use.",
+      "notFound": "Warehouse not found.",
+      "hasStock": "Cannot delete — warehouse has active inventory. Clear stock first.",
+      "invalid": "Please check the form.",
+      "unknown": "Something went wrong. Please try again."
     }
   },
   "content": {
@@ -1179,5 +1316,324 @@
         "spl": "Saudi Post (SPL)"
       }
     }
+  },
+  "abandonedCarts": {
+    "title": "Abandoned Carts",
+    "subtitle": "Track checkout drop-offs and recover lost sales with reminders.",
+    "stats": {
+      "total": "Total carts",
+      "recoveryRate": "Recovery rate",
+      "potentialRevenue": "Potential revenue",
+      "remindersSent": "Reminders sent"
+    },
+    "filter": {
+      "all": "All"
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "RECOVERED": "Recovered",
+      "EXPIRED": "Expired"
+    },
+    "table": {
+      "customer": "Customer",
+      "items": "Items",
+      "value": "Cart value",
+      "lastActivity": "Last activity",
+      "status": "Status",
+      "actions": "Actions",
+      "itemCount": "{count} items",
+      "reminderSent": "Reminder sent"
+    },
+    "actions": {
+      "sendReminder": "Send reminder",
+      "sending": "Sending…",
+      "reminderSent": "Reminder sent.",
+      "markRecovered": "Mark recovered",
+      "marking": "Marking…",
+      "markedRecovered": "Cart marked as recovered.",
+      "linkCopied": "Recovery link copied.",
+      "copyLink": "Copy recovery link",
+      "errors": {
+        "notFound": "Cart not found.",
+        "alreadyRecovered": "This cart is already recovered.",
+        "unknown": "Something went wrong. Please try again."
+      }
+    },
+    "pagination": {
+      "showing": "Showing {count} of {total} carts",
+      "page": "Page {page} of {pageCount}",
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "empty": {
+      "title": "No abandoned carts match these filters",
+      "body": "Try clearing the status filter to see every tracked checkout drop-off."
+    },
+    "errors": {
+      "notFound": "Cart not found.",
+      "unknown": "Something went wrong. Please try again."
+    }
+  },
+  "notifications": {
+    "title": "Notifications Center",
+    "subtitle": "Stay on top of orders, inventory, reviews, and system alerts.",
+    "stats": {
+      "unread": "Unread",
+      "total": "Total notifications",
+      "broadcasts": "Broadcasts",
+      "thisWeek": "This week",
+      "byType": {
+        "ORDER": "Orders",
+        "INVENTORY": "Inventory",
+        "SYSTEM": "System",
+        "REVIEW": "Reviews",
+        "CUSTOMER": "Customers"
+      }
+    },
+    "filter": {
+      "all": "All",
+      "unreadOnly": "Unread only",
+      "allReadStates": "All",
+      "unread": "Unread",
+      "read": "Read"
+    },
+    "type": {
+      "ORDER": "Orders",
+      "INVENTORY": "Inventory",
+      "SYSTEM": "System",
+      "REVIEW": "Reviews",
+      "CUSTOMER": "Customers"
+    },
+    "markAllRead": "Mark all as read",
+    "markingAll": "Marking…",
+    "allMarkedRead": "All notifications marked as read.",
+    "markRead": "Mark as read",
+    "marking": "Marking…",
+    "markedRead": "Notification marked as read.",
+    "justNow": "Just now",
+    "pagination": {
+      "showing": "Showing {count} of {total} notifications",
+      "page": "Page {page} of {pageCount}",
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "empty": {
+      "title": "No notifications match these filters",
+      "body": "Try clearing the filters to see every alert sent to your account."
+    },
+    "errors": {
+      "notFound": "Notification not found.",
+      "forbidden": "You don't have permission to update this notification.",
+      "unknown": "Something went wrong. Please try again."
+    },
+    "viewDetails": "View details"
+  },
+  "support": {
+    "title": "Help Center & Support",
+    "subtitle": "Track and respond to customer support tickets in one place.",
+    "newTicket": "New ticket",
+    "backToSupport": "Back to support",
+    "stats": {
+      "open": "Open",
+      "inProgress": "In progress",
+      "resolved": "Resolved",
+      "avgResponse": "Avg. response time",
+      "avgResponseValue": "{hours}h"
+    },
+    "filter": {
+      "all": "All statuses",
+      "allPriorities": "All priorities"
+    },
+    "status": {
+      "OPEN": "Open",
+      "IN_PROGRESS": "In progress",
+      "RESOLVED": "Resolved",
+      "CLOSED": "Closed"
+    },
+    "priority": {
+      "LOW": "Low",
+      "MEDIUM": "Medium",
+      "HIGH": "High",
+      "URGENT": "Urgent"
+    },
+    "table": {
+      "subject": "Subject",
+      "customer": "Customer",
+      "priority": "Priority",
+      "status": "Status",
+      "assignedTo": "Assigned to",
+      "unassigned": "Unassigned",
+      "created": "Created",
+      "replies": "{count} replies"
+    },
+    "pagination": {
+      "showing": "Showing {count} of {total} tickets",
+      "page": "Page {page} of {pageCount}",
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "empty": {
+      "title": "No tickets match these filters",
+      "body": "Try clearing the status or priority filter to see every support ticket on record."
+    },
+    "form": {
+      "createTitle": "New ticket",
+      "createSubtitle": "Log a new customer support request.",
+      "detailTitle": "Ticket",
+      "sectionDetails": "Ticket details",
+      "sectionInfo": "Ticket info",
+      "sectionReply": "Reply",
+      "sectionBalance": "Balance",
+      "originalMessage": "Original message",
+      "subject": "Subject",
+      "subjectPlaceholder": "Brief summary of the issue",
+      "body": "Message",
+      "bodyPlaceholder": "Describe the issue in detail…",
+      "priority": "Priority",
+      "customerPhone": "Phone",
+      "create": "Create ticket",
+      "creating": "Creating…",
+      "replyPlaceholder": "Write a reply…",
+      "sendReply": "Send reply",
+      "sending": "Sending…",
+      "replySent": "Reply sent.",
+      "statusUpdated": "Status updated.",
+      "errors": {
+        "subjectRequired": "Subject is required.",
+        "bodyRequired": "Message is required.",
+        "invalid": "Please check the form and try again.",
+        "notFound": "Ticket not found.",
+        "unknown": "Something went wrong. Please try again."
+      }
+    }
+  },
+  "giftCards": {
+    "title": "Gift Cards",
+    "subtitle": "Issue, track, and redeem store gift cards and balances.",
+    "issueCard": "Issue card",
+    "backToGiftCards": "Back to gift cards",
+    "stats": {
+      "total": "Total cards",
+      "active": "Active cards",
+      "outstanding": "Outstanding balance",
+      "redeemedThisMonth": "Redeemed this month"
+    },
+    "filter": {
+      "all": "All",
+      "search": "Search",
+      "searchPlaceholder": "Search by code or customer…"
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "REDEEMED": "Redeemed",
+      "EXPIRED": "Expired",
+      "DISABLED": "Disabled"
+    },
+    "transactionType": {
+      "ISSUE": "Issued",
+      "REDEMPTION": "Redemption",
+      "REFUND": "Refund"
+    },
+    "table": {
+      "code": "Code",
+      "issuedTo": "Issued to",
+      "unassigned": "Unassigned",
+      "initialValue": "Initial value",
+      "balance": "Balance",
+      "status": "Status",
+      "expiresAt": "Expires"
+    },
+    "pagination": {
+      "showing": "Showing {count} of {total} gift cards",
+      "page": "Page {page} of {pageCount}",
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "empty": {
+      "title": "No gift cards match these filters",
+      "body": "Try clearing the search or status filter to see every gift card on record."
+    },
+    "form": {
+      "createTitle": "Issue gift card",
+      "createSubtitle": "Generate a new gift card and assign it to a customer.",
+      "detailTitle": "Gift card",
+      "sectionDetails": "Card details",
+      "sectionInfo": "Recipient info",
+      "sectionBalance": "Balance",
+      "sectionTransactions": "Transaction history",
+      "noTransactions": "No transactions recorded yet.",
+      "code": "Code",
+      "codePlaceholder": "GIFT-2026-XXXX",
+      "initialValue": "Initial value (SAR)",
+      "customer": "Recipient",
+      "customerNone": "No recipient (open card)",
+      "customerPhone": "Phone",
+      "expiresAt": "Expiry date",
+      "issuedOn": "Issued on {date}",
+      "relatedOrder": "Order {number}",
+      "issue": "Issue card",
+      "issuing": "Issuing…",
+      "disable": "Disable card",
+      "cardDisabled": "Gift card disabled.",
+      "errors": {
+        "codeRequired": "Code must be at least 4 characters.",
+        "codeInvalid": "Use only uppercase letters, numbers, hyphens, and underscores.",
+        "codeTaken": "This code is already in use.",
+        "valueInvalid": "Enter a valid positive amount.",
+        "dateInvalid": "Enter a valid date.",
+        "notFound": "Gift card not found.",
+        "notActive": "Only active cards can be disabled.",
+        "invalid": "Please check the form and try again.",
+        "unknown": "Something went wrong. Please try again."
+      }
+    }
+  },
+  "performance": {
+    "title": "Store Performance",
+    "subtitle": "Analyse revenue trends, conversion, top products, and customer retention.",
+    "kpi": {
+      "revenue": "Revenue",
+      "orders": "Orders",
+      "conversionRate": "Conversion rate",
+      "retentionRate": "Retention rate",
+      "avgOrderValue": "Avg. order value"
+    },
+    "charts": {
+      "revenueTrend": "Revenue trend",
+      "revenueTrendSub": "Monthly revenue across the selected range.",
+      "revenue": "Revenue",
+      "topProducts": "Top performing products",
+      "topProductsSub": "Ranked by units sold in the selected range.",
+      "unitsSold": "Units sold",
+      "noData": "No data for this range."
+    },
+    "conversion": {
+      "title": "Conversion",
+      "subtitle": "Orders that reached a fulfilled or paid state.",
+      "orders": "Orders placed",
+      "converted": "Converted orders",
+      "rate": "Conversion rate",
+      "trafficRatio": "Orders per new customer"
+    },
+    "retention": {
+      "title": "Customer retention",
+      "subtitle": "Customers who placed more than one order in the range.",
+      "totalCustomers": "Active customers",
+      "repeatCustomers": "Repeat customers",
+      "rate": "Retention rate",
+      "avgOrders": "Avg. orders per customer"
+    },
+    "table": {
+      "title": "Top performing products",
+      "subtitle": "Ranked by revenue in the selected range.",
+      "product": "Product",
+      "brand": "Brand",
+      "unitsSold": "Units sold",
+      "revenue": "Revenue",
+      "rating": "Rating",
+      "noRating": "No reviews",
+      "empty": "No product sales in this range."
+    },
+    "rangeNote": "Showing data from {from} to {to}."
   }
 }

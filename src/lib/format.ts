@@ -39,3 +39,12 @@ export function formatSar(value: Numeric, locale: string): string {
 export function formatNumber(value: number, locale: string): string {
   return new Intl.NumberFormat(intlLocale(locale)).format(value);
 }
+
+/** Format a 0–1 ratio as a percentage with one decimal place, locale-aware numerals. */
+export function formatPercent(value: number, locale: string): string {
+  return new Intl.NumberFormat(intlLocale(locale), {
+    style: "percent",
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  }).format(value);
+}

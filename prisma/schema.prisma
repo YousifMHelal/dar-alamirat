@@ -125,19 +125,78 @@ enum ReviewStatus {
   REJECTED
 }
 
+enum AbandonedCartStatus {
+  ACTIVE
+  RECOVERED
+  EXPIRED
+}
+
+enum NotificationType {
+  ORDER
+  INVENTORY
+  SYSTEM
+  REVIEW
+  CUSTOMER
+}
+
+enum SupportTicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum SupportTicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum GiftCardStatus {
+  ACTIVE
+  REDEEMED
+  EXPIRED
+  DISABLED
+}
+
+enum GiftCardTransactionType {
+  ISSUE
+  REDEMPTION
+  REFUND
+}
+
+enum ImportExportJobType {
+  IMPORT
+  EXPORT
+}
+
+enum ImportExportJobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
 // ─────────────────────────────────────────────────────────────
 // Auth & people
 // ─────────────────────────────────────────────────────────────
 
 model User {
-  id             String   @id @default(cuid())
-  email          String   @unique
+  id             String  @id @default(cuid())
+  email          String  @unique
   hashedPassword String
   name           String
-  role           Role     @default(MANAGER)
-  active         Boolean  @default(true)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  role           Role    @default(MANAGER)
+  active         Boolean @default(true)
+
+  notifications    Notification[]
+  assignedTickets  SupportTicket[]
+  ticketReplies    TicketReply[]
+  importExportJobs ImportExportJob[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Customer {
@@ -162,6 +221,10 @@ model Customer {
 
   orders  Order[]
   reviews Review[]
+
+  abandonedCarts  AbandonedCart[]
+  giftCardsIssued GiftCard[]
+  supportTickets  SupportTicket[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -426,6 +489,8 @@ model Order {
   shipments Shipment[]
   payments  Payment[]
 
+  giftCardTransactions GiftCardTransaction[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -519,22 +584,174 @@ model Coupon {
 }
 
 model Review {
-  id         String       @id @default(cuid())
+  id         String   @id @default(cuid())
   productId  String
-  product    Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   customerId String
-  customer   Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
-  rating  Int // 1–5
-  title   String?
-  body    String
-  status  ReviewStatus @default(PENDING)
+  rating Int // 1–5
+  title  String?
+  body   String
+  status ReviewStatus @default(PENDING)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([productId])
   @@index([customerId])
+  @@index([status])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Marketing — abandoned carts & gift cards
+// ─────────────────────────────────────────────────────────────
+
+model AbandonedCart {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  // Lightweight snapshot of the cart contents at the time it was last touched —
+  // simpler than a live relation and survives later catalog changes.
+  items    Json
+  subtotal Decimal             @db.Decimal(10, 2)
+  status   AbandonedCartStatus @default(ACTIVE)
+
+  lastActivityAt DateTime
+  recoveryLink   String
+  reminderSentAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([customerId])
+}
+
+model GiftCard {
+  id               String         @id @default(cuid())
+  code             String         @unique
+  initialValue     Decimal        @db.Decimal(10, 2)
+  remainingBalance Decimal        @db.Decimal(10, 2)
+  status           GiftCardStatus @default(ACTIVE)
+
+  issuedToId String?
+  issuedTo   Customer? @relation(fields: [issuedToId], references: [id])
+
+  expiresAt DateTime?
+
+  transactions GiftCardTransaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([code])
+}
+
+model GiftCardTransaction {
+  id         String   @id @default(cuid())
+  giftCardId String
+  giftCard   GiftCard @relation(fields: [giftCardId], references: [id], onDelete: Cascade)
+
+  orderId String?
+  order   Order?  @relation(fields: [orderId], references: [id])
+
+  amount Decimal                 @db.Decimal(10, 2)
+  type   GiftCardTransactionType
+
+  createdAt DateTime @default(now())
+
+  @@index([giftCardId])
+  @@index([orderId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Notifications
+// ─────────────────────────────────────────────────────────────
+
+model Notification {
+  id    String           @id @default(cuid())
+  type  NotificationType
+  title String
+  body  String
+  link  String?
+
+  readAt DateTime?
+
+  // Null = broadcast to every staff member.
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, readAt])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Help Center / Support
+// ─────────────────────────────────────────────────────────────
+
+model SupportTicket {
+  id       String                @id @default(cuid())
+  subject  String
+  body     String
+  status   SupportTicketStatus   @default(OPEN)
+  priority SupportTicketPriority @default(MEDIUM)
+
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+
+  assignedToId String?
+  assignedTo   User?   @relation(fields: [assignedToId], references: [id])
+
+  replies TicketReply[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([priority])
+}
+
+model TicketReply {
+  id       String        @id @default(cuid())
+  ticketId String
+  ticket   SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
+
+  body String
+
+  createdAt DateTime @default(now())
+
+  @@index([ticketId])
+  @@index([authorId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Catalog tooling — bulk import / export jobs
+// ─────────────────────────────────────────────────────────────
+
+model ImportExportJob {
+  id     String                @id @default(cuid())
+  type   ImportExportJobType
+  status ImportExportJobStatus @default(PENDING)
+
+  fileName String
+  rowCount Int?
+  errorLog Json?
+
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([type])
   @@index([status])
 }
 

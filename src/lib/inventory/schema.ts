@@ -34,3 +34,23 @@ export const updateTransferStatusSchema = z.object({
 export type UpdateStockInput = z.infer<typeof updateStockSchema>;
 export type CreateTransferInput = z.infer<typeof createTransferSchema>;
 export type UpdateTransferStatusInput = z.infer<typeof updateTransferStatusSchema>;
+
+// ── Warehouse CRUD ─────────────────────────────────────────────
+
+export const warehouseSchema = z.object({
+  name: z.string().min(1, "nameRequired").max(100),
+  code: z.string().min(1, "codeRequired").max(20).toUpperCase(),
+  city: z.string().min(1, "cityRequired").max(100),
+});
+
+export const updateWarehouseSchema = warehouseSchema.extend({
+  id: z.string().cuid(),
+});
+
+export const deleteWarehouseSchema = z.object({
+  id: z.string().cuid(),
+});
+
+export type CreateWarehouseInput = z.infer<typeof warehouseSchema>;
+export type UpdateWarehouseInput = z.infer<typeof updateWarehouseSchema>;
+export type DeleteWarehouseInput = z.infer<typeof deleteWarehouseSchema>;

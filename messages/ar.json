@@ -5,10 +5,13 @@
   },
   "nav": {
     "sectionMain": "مساحة العمل",
-    "section_store": "المتجر",
+    "section_overview": "الرئيسية",
+    "section_orders": "الطلبات",
+    "section_catalog": "المنتجات",
     "section_marketing": "التسويق",
-    "section_finance": "المالية",
-    "section_admin": "الإدارة",
+    "section_customers": "العملاء",
+    "section_finance": "التقارير",
+    "section_system": "النظام",
     "overview": "الرئيسية والتحليلات",
     "orders": "الطلبات والشحن الذكي",
     "catalog": "المنتجات والجملة",
@@ -24,7 +27,13 @@
     "staff": "الموظفون والصلاحيات",
     "shipping": "الشحن والمناطق",
     "reviews": "التقييمات",
-    "settings": "إعدادات الربط"
+    "settings": "إعدادات الربط",
+    "abandonedCarts": "السلال المتروكة",
+    "importExport": "الاستيراد والتصدير",
+    "giftCards": "بطاقات الهدايا",
+    "performance": "أداء المتجر",
+    "notifications": "الإشعارات",
+    "support": "مركز المساعدة والدعم"
   },
   "shell": {
     "collapseSidebar": "طيّ القائمة الجانبية",
@@ -138,6 +147,30 @@
     "reviews": {
       "title": "التقييمات",
       "description": "الإشراف على تقييمات العملاء وآرائهم حول المنتجات."
+    },
+    "abandonedCarts": {
+      "title": "السلال المتروكة",
+      "description": "تتبّع عمليات التخلي عن الشراء واستردّ المبيعات الضائعة عبر التذكيرات."
+    },
+    "importExport": {
+      "title": "استيراد وتصدير المنتجات",
+      "description": "استورد أو صدّر الكتالوج بشكل مجمّع كملفات إكسل."
+    },
+    "giftCards": {
+      "title": "بطاقات الهدايا",
+      "description": "أصدر بطاقات الهدايا وتابع أرصدتها وعمليات استردادها."
+    },
+    "performance": {
+      "title": "أداء المتجر",
+      "description": "حلّل اتجاهات الإيرادات ومعدلات التحويل وأفضل المنتجات والاحتفاظ بالعملاء."
+    },
+    "notifications": {
+      "title": "مركز الإشعارات",
+      "description": "تابع الطلبات والمخزون والتقييمات وتنبيهات النظام أولاً بأول."
+    },
+    "support": {
+      "title": "مركز المساعدة والدعم",
+      "description": "تابع تذاكر دعم العملاء والرد عليها من مكان واحد."
     }
   },
   "orders": {
@@ -527,6 +560,65 @@
         "skuConflict": "صفوف بهذا الرمز لها تفاصيل منتج متعارضة.",
         "importRowFailed": "فشل استيراد الصف.",
         "unknown": "حدث خطأ ما."
+      },
+      "backToImportExport": "العودة إلى الاستيراد والتصدير"
+    },
+    "importExportPage": {
+      "title": "استيراد وتصدير المنتجات",
+      "subtitle": "حدّث الكتالوج بشكل مجمّع وراجع سجل كل عمليات الاستيراد والتصدير.",
+      "startImport": "بدء الاستيراد",
+      "stats": {
+        "totalImports": "إجمالي عمليات الاستيراد",
+        "totalExports": "إجمالي عمليات التصدير",
+        "failedJobs": "العمليات الفاشلة",
+        "lastJob": "آخر عملية"
+      },
+      "filter": {
+        "all": "الكل"
+      },
+      "type": {
+        "IMPORT": "استيراد",
+        "EXPORT": "تصدير"
+      },
+      "status": {
+        "PENDING": "قيد الانتظار",
+        "PROCESSING": "قيد المعالجة",
+        "COMPLETED": "مكتملة",
+        "FAILED": "فاشلة"
+      },
+      "table": {
+        "fileName": "الملف",
+        "type": "النوع",
+        "status": "الحالة",
+        "rowCount": "الصفوف",
+        "createdBy": "تم بواسطة",
+        "createdAt": "التاريخ"
+      },
+      "pagination": {
+        "showing": "عرض {count} من {total} عملية",
+        "page": "صفحة {page} من {pageCount}",
+        "prev": "السابق",
+        "next": "التالي"
+      },
+      "empty": {
+        "title": "لا توجد عمليات استيراد أو تصدير بعد",
+        "body": "ابدأ استيرادًا مجمّعًا أو صدّر الكتالوج لترى سجل العمليات هنا."
+      },
+      "export": {
+        "title": "تصدير الكتالوج",
+        "subtitle": "نزّل منتجاتك ومتغيراتها كملف إكسل (.xlsx).",
+        "category": "القسم",
+        "allCategories": "كل الأقسام",
+        "status": "الحالة",
+        "allStatuses": "كل الحالات",
+        "activeOnly": "النشطة فقط",
+        "inactiveOnly": "غير النشطة فقط",
+        "download": "تصدير إلى إكسل",
+        "exporting": "جارٍ تجهيز التصدير…"
+      },
+      "exportStarted": "جارٍ تنزيل ملف التصدير.",
+      "errors": {
+        "unknown": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
       }
     }
   },
@@ -536,7 +628,8 @@
     "tabs": {
       "matrix": "مصفوفة المخزون",
       "transfers": "التحويلات",
-      "purchaseOrders": "أوامر الشراء"
+      "purchaseOrders": "أوامر الشراء",
+      "warehouses": "المستودعات"
     },
     "kpi": {
       "variants": "الخيارات المتتبَّعة",
@@ -608,6 +701,50 @@
       "status_RECEIVED": "تم الاستلام",
       "status_CANCELLED": "ملغى",
       "noDate": "—"
+    },
+    "warehouses": {
+      "title": "المستودعات",
+      "add": "إضافة مستودع",
+      "addTitle": "إضافة مستودع",
+      "editTitle": "تعديل المستودع",
+      "deleteTitle": "حذف المستودع",
+      "deleteConfirm": "هل أنت متأكد من حذف \"{name}\"؟ لا يمكن التراجع عن هذا الإجراء.",
+      "deleteHasStock": "يحتوي هذا المستودع على {count} سجل مخزون. ستُحذف جميع بيانات المخزون أيضًا.",
+      "empty": "لا توجد مستودعات بعد. أضف مستودعك الأول لبدء تتبع المخزون.",
+      "createBtn": "إنشاء مستودع",
+      "saveBtn": "حفظ التغييرات",
+      "deleteBtn": "حذف المستودع",
+      "deleting": "جارٍ الحذف…",
+      "saving": "جارٍ الحفظ…",
+      "cancel": "إلغاء",
+      "createdToast": "تم إنشاء المستودع.",
+      "updatedToast": "تم تحديث المستودع.",
+      "deletedToast": "تم حذف المستودع.",
+      "editAriaLabel": "تعديل {name}",
+      "deleteAriaLabel": "حذف {name}",
+      "col": {
+        "name": "الاسم",
+        "code": "الرمز",
+        "city": "المدينة",
+        "skus": "الأصناف"
+      },
+      "field": {
+        "name": "الاسم",
+        "namePlaceholder": "مستودع الرياض الرئيسي",
+        "code": "الرمز",
+        "city": "المدينة",
+        "cityPlaceholder": "الرياض"
+      }
+    },
+    "warehouseErrors": {
+      "nameRequired": "الاسم مطلوب.",
+      "codeRequired": "الرمز مطلوب.",
+      "cityRequired": "المدينة مطلوبة.",
+      "codeTaken": "رمز المستودع مستخدم بالفعل.",
+      "notFound": "المستودع غير موجود.",
+      "hasStock": "لا يمكن الحذف — يحتوي المستودع على مخزون نشط. امسح المخزون أولاً.",
+      "invalid": "يرجى مراجعة النموذج.",
+      "unknown": "حدث خطأ ما. حاول مرة أخرى."
     }
   },
   "content": {
@@ -1179,5 +1316,324 @@
         "spl": "البريد السعودي (SPL)"
       }
     }
+  },
+  "abandonedCarts": {
+    "title": "السلال المتروكة",
+    "subtitle": "تتبّع عمليات التخلي عن الشراء واستردّ المبيعات الضائعة عبر التذكيرات.",
+    "stats": {
+      "total": "إجمالي السلال",
+      "recoveryRate": "معدل الاسترداد",
+      "potentialRevenue": "الإيرادات المحتملة",
+      "remindersSent": "التذكيرات المرسلة"
+    },
+    "filter": {
+      "all": "الكل"
+    },
+    "status": {
+      "ACTIVE": "نشطة",
+      "RECOVERED": "مستردة",
+      "EXPIRED": "منتهية"
+    },
+    "table": {
+      "customer": "العميل",
+      "items": "العناصر",
+      "value": "قيمة السلة",
+      "lastActivity": "آخر نشاط",
+      "status": "الحالة",
+      "actions": "إجراءات",
+      "itemCount": "{count} عناصر",
+      "reminderSent": "تم إرسال تذكير"
+    },
+    "actions": {
+      "sendReminder": "إرسال تذكير",
+      "sending": "جارٍ الإرسال…",
+      "reminderSent": "تم إرسال التذكير.",
+      "markRecovered": "تمييز كمستردة",
+      "marking": "جارٍ التمييز…",
+      "markedRecovered": "تم تمييز السلة كمستردة.",
+      "linkCopied": "تم نسخ رابط الاسترداد.",
+      "copyLink": "نسخ رابط الاسترداد",
+      "errors": {
+        "notFound": "السلة غير موجودة.",
+        "alreadyRecovered": "هذه السلة مستردة بالفعل.",
+        "unknown": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
+      }
+    },
+    "pagination": {
+      "showing": "عرض {count} من {total} سلة",
+      "page": "صفحة {page} من {pageCount}",
+      "prev": "السابق",
+      "next": "التالي"
+    },
+    "empty": {
+      "title": "لا توجد سلال متروكة مطابقة لهذه الفلاتر",
+      "body": "جرّب مسح فلتر الحالة لرؤية جميع عمليات التخلي عن الشراء المسجّلة."
+    },
+    "errors": {
+      "notFound": "السلة غير موجودة.",
+      "unknown": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
+    }
+  },
+  "notifications": {
+    "title": "مركز الإشعارات",
+    "subtitle": "تابع الطلبات والمخزون والتقييمات وتنبيهات النظام أولاً بأول.",
+    "stats": {
+      "unread": "غير مقروءة",
+      "total": "إجمالي الإشعارات",
+      "broadcasts": "إشعارات عامة",
+      "thisWeek": "هذا الأسبوع",
+      "byType": {
+        "ORDER": "الطلبات",
+        "INVENTORY": "المخزون",
+        "SYSTEM": "النظام",
+        "REVIEW": "التقييمات",
+        "CUSTOMER": "العملاء"
+      }
+    },
+    "filter": {
+      "all": "الكل",
+      "unreadOnly": "غير المقروءة فقط",
+      "allReadStates": "الكل",
+      "unread": "غير مقروءة",
+      "read": "مقروءة"
+    },
+    "type": {
+      "ORDER": "الطلبات",
+      "INVENTORY": "المخزون",
+      "SYSTEM": "النظام",
+      "REVIEW": "التقييمات",
+      "CUSTOMER": "العملاء"
+    },
+    "markAllRead": "تمييز الكل كمقروء",
+    "markingAll": "جارٍ التمييز…",
+    "allMarkedRead": "تم تمييز جميع الإشعارات كمقروءة.",
+    "markRead": "تمييز كمقروء",
+    "marking": "جارٍ التمييز…",
+    "markedRead": "تم تمييز الإشعار كمقروء.",
+    "justNow": "الآن",
+    "pagination": {
+      "showing": "عرض {count} من {total} إشعار",
+      "page": "صفحة {page} من {pageCount}",
+      "prev": "السابق",
+      "next": "التالي"
+    },
+    "empty": {
+      "title": "لا توجد إشعارات مطابقة لهذه الفلاتر",
+      "body": "جرّب مسح الفلاتر لرؤية جميع التنبيهات المرسلة إلى حسابك."
+    },
+    "errors": {
+      "notFound": "الإشعار غير موجود.",
+      "forbidden": "ليس لديك صلاحية تحديث هذا الإشعار.",
+      "unknown": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
+    },
+    "viewDetails": "عرض التفاصيل"
+  },
+  "support": {
+    "title": "مركز المساعدة والدعم",
+    "subtitle": "تابع تذاكر دعم العملاء والرد عليها من مكان واحد.",
+    "newTicket": "تذكرة جديدة",
+    "backToSupport": "العودة إلى الدعم",
+    "stats": {
+      "open": "مفتوحة",
+      "inProgress": "قيد المعالجة",
+      "resolved": "محلولة",
+      "avgResponse": "متوسط وقت الاستجابة",
+      "avgResponseValue": "{hours} ساعة"
+    },
+    "filter": {
+      "all": "كل الحالات",
+      "allPriorities": "كل الأولويات"
+    },
+    "status": {
+      "OPEN": "مفتوحة",
+      "IN_PROGRESS": "قيد المعالجة",
+      "RESOLVED": "محلولة",
+      "CLOSED": "مغلقة"
+    },
+    "priority": {
+      "LOW": "منخفضة",
+      "MEDIUM": "متوسطة",
+      "HIGH": "عالية",
+      "URGENT": "عاجلة"
+    },
+    "table": {
+      "subject": "الموضوع",
+      "customer": "العميل",
+      "priority": "الأولوية",
+      "status": "الحالة",
+      "assignedTo": "مُسندة إلى",
+      "unassigned": "غير مُسندة",
+      "created": "تاريخ الإنشاء",
+      "replies": "{count} ردود"
+    },
+    "pagination": {
+      "showing": "عرض {count} من {total} تذكرة",
+      "page": "صفحة {page} من {pageCount}",
+      "prev": "السابق",
+      "next": "التالي"
+    },
+    "empty": {
+      "title": "لا توجد تذاكر مطابقة لهذه الفلاتر",
+      "body": "جرّب مسح فلتر الحالة أو الأولوية لرؤية جميع تذاكر الدعم المسجّلة."
+    },
+    "form": {
+      "createTitle": "تذكرة جديدة",
+      "createSubtitle": "سجّل طلب دعم جديد من العميل.",
+      "detailTitle": "تذكرة",
+      "sectionDetails": "تفاصيل التذكرة",
+      "sectionInfo": "معلومات التذكرة",
+      "sectionReply": "الرد",
+      "sectionBalance": "الرصيد",
+      "originalMessage": "الرسالة الأصلية",
+      "subject": "الموضوع",
+      "subjectPlaceholder": "ملخص موجز للمشكلة",
+      "body": "الرسالة",
+      "bodyPlaceholder": "صف المشكلة بالتفصيل…",
+      "priority": "الأولوية",
+      "customerPhone": "الهاتف",
+      "create": "إنشاء تذكرة",
+      "creating": "جارٍ الإنشاء…",
+      "replyPlaceholder": "اكتب ردًا…",
+      "sendReply": "إرسال الرد",
+      "sending": "جارٍ الإرسال…",
+      "replySent": "تم إرسال الرد.",
+      "statusUpdated": "تم تحديث الحالة.",
+      "errors": {
+        "subjectRequired": "الموضوع مطلوب.",
+        "bodyRequired": "الرسالة مطلوبة.",
+        "invalid": "يرجى مراجعة النموذج والمحاولة مرة أخرى.",
+        "notFound": "التذكرة غير موجودة.",
+        "unknown": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
+      }
+    }
+  },
+  "giftCards": {
+    "title": "بطاقات الهدايا",
+    "subtitle": "أصدر بطاقات الهدايا وتابع أرصدتها وعمليات استردادها.",
+    "issueCard": "إصدار بطاقة",
+    "backToGiftCards": "العودة إلى بطاقات الهدايا",
+    "stats": {
+      "total": "إجمالي البطاقات",
+      "active": "البطاقات النشطة",
+      "outstanding": "الرصيد المستحق",
+      "redeemedThisMonth": "المستردة هذا الشهر"
+    },
+    "filter": {
+      "all": "الكل",
+      "search": "بحث",
+      "searchPlaceholder": "ابحث بالكود أو اسم العميل…"
+    },
+    "status": {
+      "ACTIVE": "نشطة",
+      "REDEEMED": "مستردة",
+      "EXPIRED": "منتهية",
+      "DISABLED": "معطّلة"
+    },
+    "transactionType": {
+      "ISSUE": "إصدار",
+      "REDEMPTION": "استرداد",
+      "REFUND": "استرجاع"
+    },
+    "table": {
+      "code": "الكود",
+      "issuedTo": "صادرة باسم",
+      "unassigned": "غير مخصصة",
+      "initialValue": "القيمة الأولية",
+      "balance": "الرصيد",
+      "status": "الحالة",
+      "expiresAt": "تنتهي في"
+    },
+    "pagination": {
+      "showing": "عرض {count} من {total} بطاقة",
+      "page": "صفحة {page} من {pageCount}",
+      "prev": "السابق",
+      "next": "التالي"
+    },
+    "empty": {
+      "title": "لا توجد بطاقات هدايا مطابقة لهذه الفلاتر",
+      "body": "جرّب مسح البحث أو فلتر الحالة لرؤية جميع بطاقات الهدايا المسجّلة."
+    },
+    "form": {
+      "createTitle": "إصدار بطاقة هدايا",
+      "createSubtitle": "أنشئ بطاقة هدايا جديدة وخصّصها لعميل.",
+      "detailTitle": "بطاقة هدايا",
+      "sectionDetails": "تفاصيل البطاقة",
+      "sectionInfo": "معلومات المستفيد",
+      "sectionBalance": "الرصيد",
+      "sectionTransactions": "سجل العمليات",
+      "noTransactions": "لا توجد عمليات مسجّلة بعد.",
+      "code": "الكود",
+      "codePlaceholder": "GIFT-2026-XXXX",
+      "initialValue": "القيمة الأولية (ر.س)",
+      "customer": "المستفيد",
+      "customerNone": "بدون مستفيد محدد (بطاقة مفتوحة)",
+      "customerPhone": "الهاتف",
+      "expiresAt": "تاريخ الانتهاء",
+      "issuedOn": "صدرت في {date}",
+      "relatedOrder": "الطلب {number}",
+      "issue": "إصدار البطاقة",
+      "issuing": "جارٍ الإصدار…",
+      "disable": "تعطيل البطاقة",
+      "cardDisabled": "تم تعطيل بطاقة الهدايا.",
+      "errors": {
+        "codeRequired": "يجب أن يتكوّن الكود من 4 أحرف على الأقل.",
+        "codeInvalid": "استخدم الأحرف الكبيرة والأرقام والشرطات وفواصل التسطير فقط.",
+        "codeTaken": "هذا الكود مستخدم بالفعل.",
+        "valueInvalid": "أدخل مبلغًا صحيحًا أكبر من صفر.",
+        "dateInvalid": "أدخل تاريخًا صحيحًا.",
+        "notFound": "بطاقة الهدايا غير موجودة.",
+        "notActive": "يمكن تعطيل البطاقات النشطة فقط.",
+        "invalid": "يرجى مراجعة النموذج والمحاولة مرة أخرى.",
+        "unknown": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
+      }
+    }
+  },
+  "performance": {
+    "title": "أداء المتجر",
+    "subtitle": "حلّل اتجاهات الإيرادات ومعدلات التحويل وأفضل المنتجات واحتفاظ العملاء.",
+    "kpi": {
+      "revenue": "الإيرادات",
+      "orders": "الطلبات",
+      "conversionRate": "معدل التحويل",
+      "retentionRate": "معدل الاحتفاظ",
+      "avgOrderValue": "متوسط قيمة الطلب"
+    },
+    "charts": {
+      "revenueTrend": "اتجاه الإيرادات",
+      "revenueTrendSub": "الإيرادات الشهرية خلال النطاق المحدد.",
+      "revenue": "الإيرادات",
+      "topProducts": "أفضل المنتجات أداءً",
+      "topProductsSub": "مرتبة حسب الوحدات المباعة في النطاق المحدد.",
+      "unitsSold": "الوحدات المباعة",
+      "noData": "لا توجد بيانات لهذا النطاق."
+    },
+    "conversion": {
+      "title": "التحويل",
+      "subtitle": "الطلبات التي وصلت إلى حالة مكتملة أو مدفوعة.",
+      "orders": "الطلبات المقدمة",
+      "converted": "الطلبات المحوّلة",
+      "rate": "معدل التحويل",
+      "trafficRatio": "الطلبات لكل عميل جديد"
+    },
+    "retention": {
+      "title": "احتفاظ العملاء",
+      "subtitle": "العملاء الذين قدّموا أكثر من طلب واحد خلال النطاق.",
+      "totalCustomers": "العملاء النشطون",
+      "repeatCustomers": "العملاء المتكررون",
+      "rate": "معدل الاحتفاظ",
+      "avgOrders": "متوسط الطلبات لكل عميل"
+    },
+    "table": {
+      "title": "أفضل المنتجات أداءً",
+      "subtitle": "مرتبة حسب الإيرادات في النطاق المحدد.",
+      "product": "المنتج",
+      "brand": "العلامة التجارية",
+      "unitsSold": "الوحدات المباعة",
+      "revenue": "الإيرادات",
+      "rating": "التقييم",
+      "noRating": "لا توجد تقييمات",
+      "empty": "لا توجد مبيعات منتجات في هذا النطاق."
+    },
+    "rangeNote": "عرض البيانات من {from} إلى {to}."
   }
 }

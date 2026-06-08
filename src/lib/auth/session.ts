@@ -1,15 +1,7 @@
 import { auth } from "./index";
+import { prisma } from "@/lib/prisma";
 import type { Role } from "@/generated/prisma/client";
 
-/**
- * Session helpers for Server Components and server actions.
- *
- * `getCurrentUser` returns the typed session user (id, name, email, role)
- * or null. `requireUser` is the assertive variant for code paths that must
- * have an authenticated user — it throws if there is none (the middleware
- * already redirects unauthenticated requests, so reaching this without a
- * session means a misconfiguration, not a normal flow).
- */
 export interface CurrentUser {
   id: string;
   name: string | null;
@@ -27,5 +19,10 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
 export async function requireUser(): Promise<CurrentUser> {
   const user = await getCurrentUser();
   if (!user) throw new Error("Not authenticated");
+
+  // Guard against a stale JWT referencing a deleted/reseeded user.
+  const exists = await prisma.user.findUnique({ where: { id: user.id }, select: { id: true } });
+  if (!exists) throw new Error("Not authenticated");
+
   return user;
 }

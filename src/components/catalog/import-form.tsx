@@ -13,7 +13,8 @@ import {
 } from "lucide-react";
 import { formatNumber } from "@/lib/format";
 import { Button } from "@/components/ui/button";
-import { importCatalog, type ImportSummary } from "@/lib/catalog/import/actions";
+import type { ImportSummary } from "@/lib/catalog/import/actions";
+import { importCatalogWithJob } from "@/lib/catalog/import-export/actions";
 
 /**
  * Bulk-import UI: pick a .xlsx, POST it to the import server action via
@@ -74,7 +75,7 @@ export function ImportForm({ locale }: { locale: string }) {
     const fd = new FormData();
     fd.append("file", file);
     startUpload(async () => {
-      const res = await importCatalog(fd);
+      const res = await importCatalogWithJob(fd);
       if (res.ok) setSummary(res.summary);
       else setTopError(tErr(res.error));
     });

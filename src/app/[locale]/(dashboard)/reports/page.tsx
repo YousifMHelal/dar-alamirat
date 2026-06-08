@@ -13,7 +13,7 @@ import {
   resolveRange,
 } from "@/lib/queries/overview";
 import { DateRangeFilter } from "@/components/overview/date-range-filter";
-import { formatSar, formatNumber } from "@/lib/format";
+import { formatSar, formatNumber, formatPercent } from "@/lib/format";
 import { ExportButton } from "@/components/reports/export-button";
 
 const MODULE_KEY = "reports";
@@ -120,7 +120,7 @@ export default async function ReportsPage({
           { label: t("kpi.b2cSales"), value: formatSar(kpis.b2c.sales, locale) },
           {
             label: t("kpi.conversion"),
-            value: `${(kpis.conversionProxy * 100).toFixed(1)}%`,
+            value: formatPercent(kpis.conversionProxy, locale),
           },
         ].map(({ label, value }) => (
           <div

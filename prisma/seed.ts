@@ -170,6 +170,14 @@ const nextBarcode = () => faker.string.numeric({ length: 13, allowLeadingZeros: 
  */
 async function clearAll() {
   // Children first, parents last.
+  await prisma.ticketReply.deleteMany();
+  await prisma.supportTicket.deleteMany();
+  await prisma.notification.deleteMany();
+  await prisma.giftCardTransaction.deleteMany();
+  await prisma.giftCard.deleteMany();
+  await prisma.abandonedCart.deleteMany();
+  await prisma.importExportJob.deleteMany();
+
   await prisma.review.deleteMany();
   await prisma.payment.deleteMany();
   await prisma.shipment.deleteMany();
@@ -215,6 +223,7 @@ async function main() {
       { email: "salon@daralamirat.sa", name: "Salon Partner", role: "B2B_SALON", hashedPassword: hashed },
     ],
   });
+  const staffUsers = await prisma.user.findMany({ where: { role: { in: ["ADMIN", "MANAGER"] } }, orderBy: { createdAt: "asc" } });
 
   // ── Warehouses ─────────────────────────────────────────────
   const warehouses = [];
@@ -806,6 +815,282 @@ async function main() {
     });
   }
 
+  // ── Abandoned carts ─────────────────────────────────────────
+  const TARGET_ABANDONED_CARTS = 36;
+  const cartStatuses = ["ACTIVE", "RECOVERED", "EXPIRED"] as const;
+  for (let i = 0; i < TARGET_ABANDONED_CARTS; i++) {
+    const customer = pick(customers);
+    const lineCount = int(1, 5);
+    const chosen = faker.helpers.arrayElements(allVariants, lineCount);
+    let subtotal = new Prisma.Decimal(0);
+    const items = chosen.map((variant) => {
+      const unit = variant.priceOverride ?? variant.basePrice;
+      const qty = int(1, 3);
+      const lineTotal = unit.mul(qty);
+      subtotal = subtotal.add(lineTotal);
+      return { variantId: variant.id, quantity: qty, unitPrice: unit.toFixed(2) };
+    });
+
+    const status = pick([...cartStatuses, ...cartStatuses, "EXPIRED"] as const);
+    const lastActivityAt = faker.date.between({ from: "2026-04-01T00:00:00.000Z", to: NOW });
+    const reminderSentAt = status !== "ACTIVE" || chance(0.5) ? faker.date.soon({ days: 2, refDate: lastActivityAt }) : null;
+
+    await prisma.abandonedCart.create({
+      data: {
+        customerId: customer.id,
+        items,
+        subtotal: D(Number(subtotal)),
+        status,
+        lastActivityAt,
+        recoveryLink: `https://daralamirat.sa/cart/recover/${faker.string.alphanumeric({ length: 12 }).toLowerCase()}`,
+        reminderSentAt,
+      },
+    });
+  }
+
+  // ── Notifications ───────────────────────────────────────────
+  const TARGET_NOTIFICATIONS = 60;
+  const notificationDefs: Record<
+    "ORDER" | "INVENTORY" | "SYSTEM" | "REVIEW" | "CUSTOMER",
+    { titles: readonly string[]; bodies: readonly string[]; link: (n: number) => string }
+  > = {
+    ORDER: {
+      titles: ["New order received", "Order ready to ship", "Order delivered"],
+      bodies: [
+        "A new order has been placed and is awaiting confirmation.",
+        "An order has cleared payment and is ready for warehouse pickup.",
+        "An order was marked as delivered by the carrier.",
+      ],
+      link: (n) => `/orders?focus=${orderNumber(n)}`,
+    },
+    INVENTORY: {
+      titles: ["Low stock alert", "Stock transfer completed", "Reorder threshold reached"],
+      bodies: [
+        "A product variant has fallen below its minimum stock threshold.",
+        "A stock transfer between warehouses has completed successfully.",
+        "Several SKUs are approaching their reorder point this week.",
+      ],
+      link: () => "/inventory",
+    },
+    SYSTEM: {
+      titles: ["Scheduled maintenance", "Mobile app sync delayed", "New integration available"],
+      bodies: [
+        "Planned maintenance is scheduled for the storefront this weekend.",
+        "The Android app's last sync took longer than expected — investigating.",
+        "A new payment integration is available to enable in Settings.",
+      ],
+      link: () => "/settings",
+    },
+    REVIEW: {
+      titles: ["New review awaiting moderation", "Product flagged in a review", "Review response needed"],
+      bodies: [
+        "A customer left a new review that needs moderation before publishing.",
+        "A low-rating review mentioned a possible product quality issue.",
+        "A published review is asking a question that may need a reply.",
+      ],
+      link: () => "/reviews",
+    },
+    CUSTOMER: {
+      titles: ["New customer registered", "Customer reached loyalty milestone", "Customer support escalation"],
+      bodies: [
+        "A new customer account was created from the storefront.",
+        "A loyal customer just crossed a new loyalty points milestone.",
+        "A customer's support ticket needs urgent attention.",
+      ],
+      link: () => "/customers",
+    },
+  };
+  const notificationTypes = ["ORDER", "INVENTORY", "SYSTEM", "REVIEW", "CUSTOMER"] as const;
+  for (let i = 0; i < TARGET_NOTIFICATIONS; i++) {
+    const type = pick(notificationTypes);
+    const def = notificationDefs[type];
+    const idx = int(0, def.titles.length - 1);
+    const createdAt = faker.date.between({ from: "2026-05-01T00:00:00.000Z", to: NOW });
+    // ~35% broadcast to everyone (userId null); the rest target one staff member.
+    const isBroadcast = chance(0.35);
+    const readAt = chance(0.55) ? faker.date.soon({ days: 3, refDate: createdAt }) : null;
+    await prisma.notification.create({
+      data: {
+        type,
+        title: def.titles[idx]!,
+        body: def.bodies[idx]!,
+        link: def.link(int(1, 200)),
+        userId: isBroadcast ? null : pick(staffUsers).id,
+        readAt,
+        createdAt,
+      },
+    });
+  }
+
+  // ── Support tickets + replies ───────────────────────────────
+  const TARGET_TICKETS = 28;
+  const ticketStatuses = ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"] as const;
+  const ticketPriorities = ["LOW", "MEDIUM", "HIGH", "URGENT"] as const;
+  const ticketSubjects = [
+    "Order hasn't arrived yet",
+    "Wrong item received",
+    "Need to change shipping address",
+    "Question about a product ingredient",
+    "Refund request for damaged item",
+    "Coupon code not applying at checkout",
+    "Loyalty points missing from my account",
+    "Gift card balance not updating",
+    "Can't log into my account",
+    "Bulk order inquiry for my salon",
+  ];
+  const ticketBodies = [
+    "I placed my order over a week ago and the tracking hasn't updated since. Could you please check the status?",
+    "The package arrived but it had the wrong shade — I ordered the lighter tone. How can I get this exchanged?",
+    "I need to update the delivery address on my recent order before it ships out. Is that still possible?",
+    "Can you confirm whether this product is suitable for sensitive skin? The listing doesn't mention fragrance-free.",
+    "My order arrived with a cracked bottle and product had leaked into the box. I'd like a refund or replacement.",
+    "I tried applying my discount code at checkout but it says invalid even though it hasn't expired yet.",
+    "I made a purchase last month but my loyalty points balance hasn't increased. Can you look into this?",
+    "I redeemed part of my gift card but the remaining balance shown in my account looks incorrect.",
+    "I'm getting an error every time I try to sign in, even after resetting my password.",
+    "We're a salon partner looking to place a recurring bulk order — who can help us set up wholesale pricing?",
+  ];
+  const replyBodies = [
+    "Thanks for reaching out — I've checked your order and it's currently with the carrier. I'll follow up with them directly and keep you posted.",
+    "I'm sorry to hear that. I've started a replacement request on our end; you should receive a confirmation email shortly.",
+    "I've updated your shipping details as requested — the change will apply as long as the order hasn't shipped yet.",
+    "Good question! I've attached the full ingredient list from our supplier so you can review it before use.",
+    "That's not the experience we want you to have. I've issued a refund to your original payment method — it should reflect within 3-5 business days.",
+    "Apologies for the trouble — I checked the code and it looks like it required a higher minimum order. I've applied a manual discount to make up for it.",
+    "Thanks for flagging this — I can see the order now and I've manually credited the missing points to your account.",
+    "I've recalculated your balance and corrected a sync issue — the updated amount should now be visible in your account.",
+    "I've reset your account access on our side; you should be able to log in now with a fresh password reset link.",
+    "Happy to help set this up — I'm looping in our B2B team who will reach out with tier pricing details this week.",
+  ];
+
+  for (let i = 0; i < TARGET_TICKETS; i++) {
+    const idx = int(0, ticketSubjects.length - 1);
+    const status = pick(ticketStatuses);
+    const priority = pick(ticketPriorities);
+    const createdAt = faker.date.between({ from: "2026-04-15T00:00:00.000Z", to: NOW });
+    const isAssigned = status !== "OPEN" || chance(0.4);
+
+    const ticket = await prisma.supportTicket.create({
+      data: {
+        subject: ticketSubjects[idx]!,
+        body: ticketBodies[idx]!,
+        status,
+        priority,
+        customerId: chance(0.9) ? pick(customers).id : null,
+        assignedToId: isAssigned ? pick(staffUsers).id : null,
+        createdAt,
+      },
+    });
+
+    if (status !== "OPEN") {
+      const replyCount = int(1, 3);
+      let replyAt = createdAt;
+      for (let r = 0; r < replyCount; r++) {
+        replyAt = faker.date.soon({ days: int(1, 3), refDate: replyAt });
+        await prisma.ticketReply.create({
+          data: {
+            ticketId: ticket.id,
+            authorId: pick(staffUsers).id,
+            body: pick(replyBodies),
+            createdAt: replyAt,
+          },
+        });
+      }
+    }
+  }
+
+  // ── Gift cards + transactions ───────────────────────────────
+  const TARGET_GIFT_CARDS = 30;
+  const giftCardStatuses = ["ACTIVE", "REDEEMED", "EXPIRED", "DISABLED"] as const;
+  const giftCardValues = [50, 100, 150, 200, 300, 500] as const;
+  let giftCardCounter = 1;
+
+  for (let i = 0; i < TARGET_GIFT_CARDS; i++) {
+    const initialValue = D(pick(giftCardValues));
+    const status = pick([...giftCardStatuses, "ACTIVE", "ACTIVE"] as const);
+    const issuedTo = chance(0.8) ? pick(customers) : null;
+    const issuedAt = faker.date.between({ from: "2026-01-01T00:00:00.000Z", to: NOW });
+    const expiresAt = chance(0.7) ? faker.date.future({ years: 1, refDate: issuedAt }) : null;
+
+    let remainingBalance = initialValue;
+    const transactions: { amount: Prisma.Decimal; type: "ISSUE" | "REDEMPTION" | "REFUND"; createdAt: Date }[] = [
+      { amount: initialValue, type: "ISSUE", createdAt: issuedAt },
+    ];
+
+    if (status === "REDEEMED" || status === "EXPIRED" || (status === "ACTIVE" && chance(0.4))) {
+      const redemptionCount = int(1, 2);
+      let redeemedAt = issuedAt;
+      for (let r = 0; r < redemptionCount && remainingBalance.greaterThan(0); r++) {
+        redeemedAt = faker.date.soon({ days: int(5, 60), refDate: redeemedAt });
+        if (redeemedAt > NOW) break;
+        const portion = status === "REDEEMED" ? remainingBalance : D(Number(remainingBalance) * faker.number.float({ min: 0.2, max: 0.6, fractionDigits: 2 }));
+        const amount = portion.greaterThan(remainingBalance) ? remainingBalance : portion;
+        remainingBalance = remainingBalance.sub(amount);
+        transactions.push({ amount, type: "REDEMPTION", createdAt: redeemedAt });
+      }
+    }
+    if (status === "REDEEMED") remainingBalance = D(0);
+
+    const giftCard = await prisma.giftCard.create({
+      data: {
+        code: `GIFT-${String(giftCardCounter++).padStart(5, "0")}-${faker.string.alphanumeric({ length: 4 }).toUpperCase()}`,
+        initialValue,
+        remainingBalance,
+        status,
+        issuedToId: issuedTo?.id ?? null,
+        expiresAt,
+        createdAt: issuedAt,
+      },
+    });
+
+    for (const tx of transactions) {
+      await prisma.giftCardTransaction.create({
+        data: {
+          giftCardId: giftCard.id,
+          amount: tx.amount,
+          type: tx.type,
+          createdAt: tx.createdAt,
+        },
+      });
+    }
+  }
+
+  // ── Import / export jobs ────────────────────────────────────
+  const importExportSeeds = [
+    { type: "IMPORT" as const, status: "COMPLETED" as const, fileName: "catalog-spring-restock.xlsx", rowCount: 184, errorLog: null },
+    { type: "IMPORT" as const, status: "COMPLETED" as const, fileName: "catalog-new-arrivals-march.xlsx", rowCount: 96, errorLog: null },
+    {
+      type: "IMPORT" as const,
+      status: "FAILED" as const,
+      fileName: "catalog-vendor-list-q1.xlsx",
+      rowCount: 52,
+      errorLog: [
+        { row: 4, column: "category", message: "categoryUnknown" },
+        { row: 11, column: "basePrice", message: "basePriceInvalid" },
+        { row: 27, column: "variantSku", message: "variantSkuDuplicate" },
+      ],
+    },
+    { type: "EXPORT" as const, status: "COMPLETED" as const, fileName: "catalog-export-2026-05.xlsx", rowCount: 250, errorLog: null },
+    { type: "EXPORT" as const, status: "COMPLETED" as const, fileName: "catalog-export-active-only.xlsx", rowCount: 231, errorLog: null },
+    { type: "IMPORT" as const, status: "PROCESSING" as const, fileName: "catalog-summer-collection.xlsx", rowCount: null, errorLog: null },
+    { type: "EXPORT" as const, status: "PENDING" as const, fileName: "catalog-export-wholesale.xlsx", rowCount: null, errorLog: null },
+  ];
+  let jobOffset = 0;
+  for (const job of importExportSeeds) {
+    jobOffset += int(2, 9);
+    await prisma.importExportJob.create({
+      data: {
+        type: job.type,
+        status: job.status,
+        fileName: job.fileName,
+        rowCount: job.rowCount,
+        errorLog: job.errorLog ?? undefined,
+        createdById: pick(staffUsers).id,
+        createdAt: faker.date.soon({ days: jobOffset, refDate: new Date("2026-05-01T00:00:00.000Z") }),
+      },
+    });
+  }
+
   // ── Settings (placeholder integration config) ──────────────
   // IMPORTANT: no real secrets. Real keys are wired in a later phase.
   const settingKeys = ["meta_whatsapp", "zatca", "tabby", "tamara", "aramex", "smsa", "spl", "mada"];
@@ -874,6 +1159,13 @@ async function main() {
     redirects: await prisma.redirect.count(),
     seoMeta: await prisma.seoMeta.count(),
     settings: await prisma.setting.count(),
+    abandonedCarts: await prisma.abandonedCart.count(),
+    notifications: await prisma.notification.count(),
+    supportTickets: await prisma.supportTicket.count(),
+    ticketReplies: await prisma.ticketReply.count(),
+    giftCards: await prisma.giftCard.count(),
+    giftCardTransactions: await prisma.giftCardTransaction.count(),
+    importExportJobs: await prisma.importExportJob.count(),
   };
 
   console.log("\n✅ Seed complete. Row counts:");
