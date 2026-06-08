@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
-import { modules } from "@/lib/modules";
+import { modules, type ModuleKey } from "@/lib/modules";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "./sidebar-context";
 
@@ -10,11 +10,24 @@ import { useSidebar } from "./sidebar-context";
  * The module nav list, shared by the desktop sidebar and the mobile
  * drawer. Active state is derived from the locale-stripped pathname.
  * Spacing/alignment use logical properties so the list mirrors in RTL.
+ *
+ * `moduleKeys` is the role-filtered allow-list computed server-side; only
+ * those modules render. This is the "hide what you can't reach" half of
+ * RBAC — the server-side route guard is the enforcing half.
  */
-export function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
+export function NavLinks({
+  moduleKeys,
+  onNavigate,
+}: {
+  moduleKeys: readonly ModuleKey[];
+  onNavigate?: () => void;
+}) {
   const t = useTranslations("nav");
   const pathname = usePathname();
   const { collapsed } = useSidebar();
+
+  const allowed = new Set(moduleKeys);
+  const visibleModules = modules.filter((m) => allowed.has(m.key));
 
   return (
     <nav
@@ -27,7 +40,7 @@ export function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
         </span>
       )}
 
-      {modules.map(({ key, href, icon: Icon }) => {
+      {visibleModules.map(({ key, href, icon: Icon }) => {
         const isActive = pathname === href || pathname.startsWith(`${href}/`);
 
         return (

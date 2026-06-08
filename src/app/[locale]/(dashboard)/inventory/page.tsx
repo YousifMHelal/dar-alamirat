@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { ModulePage } from "@/components/module-page";
+import { requireModuleAccess } from "@/lib/auth/guard";
 
 const MODULE_KEY = "inventory";
 
@@ -22,5 +23,7 @@ export default async function Page({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  // Server-side RBAC: blocks roles that lack this module even via direct URL.
+  await requireModuleAccess(MODULE_KEY, locale);
   return <ModulePage moduleKey={MODULE_KEY} />;
 }

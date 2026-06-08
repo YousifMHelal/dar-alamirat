@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { ModuleKey } from "@/lib/modules";
 import { Brand } from "./brand";
 import { NavLinks } from "./nav-links";
 import { useSidebar } from "./sidebar-context";
@@ -13,7 +14,7 @@ import { useSidebar } from "./sidebar-context";
  * borders. Collapses to an icons-only rail via the toggle. Hidden below
  * lg, where the mobile drawer takes over.
  */
-export function Sidebar() {
+export function Sidebar({ moduleKeys }: { moduleKeys: readonly ModuleKey[] }) {
   const t = useTranslations("shell");
   const { collapsed, toggleCollapsed } = useSidebar();
 
@@ -35,7 +36,7 @@ export function Sidebar() {
       </div>
 
       <div className="scrollbar-subtle flex-1 overflow-y-auto">
-        <NavLinks />
+        <NavLinks moduleKeys={moduleKeys} />
       </div>
 
       <div className="border-sidebar-border border-t p-3">

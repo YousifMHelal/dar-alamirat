@@ -29,11 +29,35 @@
   },
   "user": {
     "menu": "Account menu",
-    "name": "Amira Al-Saud",
-    "role": "Operations Lead",
-    "profile": "Profile",
-    "preferences": "Preferences",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "signingOut": "Signing out…"
+  },
+  "auth": {
+    "title": "Welcome back",
+    "subtitle": "Sign in to the Dar Al-Amirat operations portal.",
+    "heroTitle": "Run every part of the business from one elegant workspace.",
+    "heroSubtitle": "Catalog, inventory, orders, financials, and more — unified for the Dar Al-Amirat team.",
+    "footnote": "© Dar Al-Amirat — Operations Portal",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "you@daralamirat.sa",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "signIn": "Sign in",
+    "signingIn": "Signing in…",
+    "roles": {
+      "ADMIN": "Administrator",
+      "MANAGER": "Operations Manager",
+      "B2B_SALON": "Salon Partner"
+    },
+    "errors": {
+      "emailRequired": "Email is required.",
+      "emailInvalid": "Enter a valid email address.",
+      "passwordRequired": "Password is required.",
+      "invalidCredentials": "Incorrect email or password.",
+      "unknown": "Something went wrong. Please try again."
+    }
   },
   "modules": {
     "comingSoon": "Coming in a later phase",

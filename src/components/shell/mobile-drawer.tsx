@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { ModuleKey } from "@/lib/modules";
 import { Brand } from "./brand";
 import { NavLinks } from "./nav-links";
 import { useSidebar } from "./sidebar-context";
@@ -13,7 +14,11 @@ import { useSidebar } from "./sidebar-context";
  * left in EN) via logical `start-0` positioning, with a dismiss scrim.
  * Shown only below lg, where the static sidebar is hidden.
  */
-export function MobileDrawer() {
+export function MobileDrawer({
+  moduleKeys,
+}: {
+  moduleKeys: readonly ModuleKey[];
+}) {
   const t = useTranslations("shell");
   const { mobileOpen, setMobileOpen } = useSidebar();
 
@@ -76,7 +81,10 @@ export function MobileDrawer() {
         </div>
 
         <div className="scrollbar-subtle flex-1 overflow-y-auto">
-          <NavLinks onNavigate={() => setMobileOpen(false)} />
+          <NavLinks
+            moduleKeys={moduleKeys}
+            onNavigate={() => setMobileOpen(false)}
+          />
         </div>
       </aside>
     </div>

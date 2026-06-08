@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Menu } from "lucide-react";
+import type { Role } from "@/generated/prisma/client";
 import { LanguageToggle } from "./language-toggle";
 import { UserMenu } from "./user-menu";
 import { useSidebar } from "./sidebar-context";
@@ -12,7 +13,13 @@ import { useSidebar } from "./sidebar-context";
  * menu. All horizontal layout uses flex + logical spacing so it mirrors
  * correctly in RTL.
  */
-export function Topbar() {
+export function Topbar({
+  user,
+  locale,
+}: {
+  user: { name: string | null; email: string | null; role: Role };
+  locale: string;
+}) {
   const t = useTranslations("shell");
   const { setMobileOpen } = useSidebar();
 
@@ -32,7 +39,7 @@ export function Topbar() {
       <div className="flex items-center gap-2 sm:gap-3">
         <LanguageToggle />
         <span className="bg-border hidden h-6 w-px sm:block" />
-        <UserMenu />
+        <UserMenu user={user} locale={locale} />
       </div>
     </header>
   );
