@@ -44,6 +44,7 @@ function compactSar(value: number, locale: string): string {
     currency: "SAR",
     notation: "compact",
     maximumFractionDigits: 1,
+    numberingSystem: "latn",
   }).format(value);
 }
 

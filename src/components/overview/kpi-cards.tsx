@@ -27,6 +27,7 @@ export async function KpiCards({
     new Intl.NumberFormat(locale === "ar" ? "ar-SA" : "en-US", {
       style: "percent",
       maximumFractionDigits: 1,
+      numberingSystem: "latn",
     }).format(v);
 
   const cards: {

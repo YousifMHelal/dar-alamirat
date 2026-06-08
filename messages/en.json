@@ -46,6 +46,7 @@
     "hidePassword": "Hide password",
     "signIn": "Sign in",
     "signingIn": "Signing in…",
+    "autofillAdmin": "Auto Fill Admin Credentials",
     "roles": {
       "ADMIN": "Administrator",
       "MANAGER": "Operations Manager",

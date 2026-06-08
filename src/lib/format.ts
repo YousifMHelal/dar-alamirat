@@ -30,8 +30,8 @@ export function formatSar(value: Numeric, locale: string): string {
   return new Intl.NumberFormat(intlLocale(locale), {
     style: "currency",
     currency: CURRENCY,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(Number(value));
 }
 

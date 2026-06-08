@@ -35,10 +35,19 @@ export function LoginForm() {
   const passwordId = useId();
   const emailRef = useRef<HTMLInputElement>(null);
 
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const handleAutofill = () => {
+    setEmail("admin@daralamirat.sa");
+    setPassword("DarAlAmirat#2026");
+    setFieldErrors({});
+    setFormError(null);
+  };
 
   /** Where to land after a successful sign-in (locale prefix stripped). */
   function destination(): string {
@@ -116,6 +125,8 @@ export function LoginForm() {
           autoComplete="email"
           dir="ltr"
           inputMode="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           placeholder={t("emailPlaceholder")}
           aria-invalid={!!fieldErrors.email}
           aria-describedby={fieldErrors.email ? `${emailId}-error` : undefined}
@@ -161,6 +172,8 @@ export function LoginForm() {
             type={showPassword ? "text" : "password"}
             autoComplete="current-password"
             dir="ltr"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             placeholder={t("passwordPlaceholder")}
             aria-invalid={!!fieldErrors.password}
             aria-describedby={
@@ -210,10 +223,21 @@ export function LoginForm() {
       </div>
 
       <Button
+        type="button"
+        variant="outline"
+        size="lg"
+        disabled={isPending}
+        onClick={handleAutofill}
+        className="mt-1 w-full"
+      >
+        {t("autofillAdmin")}
+      </Button>
+
+      <Button
         type="submit"
         size="lg"
         disabled={isPending}
-        className="mt-1 w-full"
+        className="w-full"
       >
         {isPending ? (
           <>
