@@ -35,38 +35,6 @@ export default async function LoginPage({
 
   return (
     <div className="bg-background flex min-h-dvh flex-col lg:flex-row">
-      {/* Brand panel — warm gradient surface with editorial copy. */}
-      <aside className="bg-sidebar border-sidebar-border relative hidden overflow-hidden border-e p-12 lg:flex lg:w-[44%] lg:flex-col lg:justify-between">
-        {/* Soft accent glows — on-brand rose/gold, no harsh gradients. */}
-        <div
-          aria-hidden
-          className="bg-primary-soft pointer-events-none absolute -top-24 -end-24 size-72 rounded-full blur-3xl"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -bottom-32 -start-16 size-80 rounded-full blur-3xl"
-          style={{ background: "var(--accent)", opacity: 0.12 }}
-        />
-
-        <Brand />
-
-        <div className="relative flex flex-col gap-5">
-          <span className="bg-primary-soft text-primary flex size-12 items-center justify-center rounded-2xl">
-            <Sparkles className="size-6" />
-          </span>
-          <h2 className="font-display text-foreground max-w-md text-3xl leading-tight font-semibold">
-            {t("heroTitle")}
-          </h2>
-          <p className="text-muted-foreground max-w-md text-base leading-relaxed">
-            {t("heroSubtitle")}
-          </p>
-        </div>
-
-        <p className="text-muted-foreground relative text-xs">
-          {t("footnote")}
-        </p>
-      </aside>
-
       {/* Form panel */}
       <main className="flex flex-1 flex-col px-6 py-10 sm:px-10">
         <div className="flex items-center justify-between gap-3 lg:justify-end">

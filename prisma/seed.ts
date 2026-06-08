@@ -339,6 +339,33 @@ async function main() {
     });
   }
 
+  // ── A few inbound purchase orders (basic procurement log) ──
+  const PO_SUPPLIERS = ["Gulf Beauty Imports", "Levant Cosmetics Co.", "Riyadh Wholesale Depot", "Jeddah Trading House"] as const;
+  for (let i = 0; i < 8; i++) {
+    const wh = pick(warehouses);
+    const lineCount = int(2, 5);
+    const items: Array<{ sku: string; name: string; quantity: number; unitCost: number }> = [];
+    let total = 0;
+    for (let l = 0; l < lineCount; l++) {
+      const qty = int(20, 200);
+      const unitCost = faker.number.float({ min: 12, max: 220, fractionDigits: 2 });
+      items.push({ sku: nextSku("PO"), name: faker.commerce.productName(), quantity: qty, unitCost });
+      total += qty * unitCost;
+    }
+    await prisma.purchaseOrder.create({
+      data: {
+        poNumber: `PO-2026-${String(i + 1).padStart(4, "0")}`,
+        supplier: pick(PO_SUPPLIERS),
+        warehouseId: wh.id,
+        status: pick(["DRAFT", "ORDERED", "RECEIVED", "CANCELLED"] as const),
+        items,
+        total: D(total),
+        expectedAt: chance(0.7) ? faker.date.soon({ days: 30 }) : null,
+        notes: chance(0.4) ? faker.lorem.sentence() : null,
+      },
+    });
+  }
+
   // ── Pricing tiers + tier prices ────────────────────────────
   const tierDefs = [
     { name: "Silver Salon", description: "Entry wholesale tier for small salons." },
@@ -611,6 +638,37 @@ async function main() {
       key,
       valueJson: { enabled: false, apiKey: "", secret: "", note: "placeholder — real credentials provided in a later phase" },
     })),
+  });
+
+  // ── Mobile-app sync status (read by the Overview "system sync" panel) ──
+  // Real, structured rows describing the iOS/Android storefront apps'
+  // last successful catalog/inventory/orders sync. Values are static here
+  // (no live mobile backend yet) but the panel reads them as real data.
+  await prisma.setting.createMany({
+    data: [
+      {
+        key: "mobile_sync_ios",
+        valueJson: {
+          platform: "iOS",
+          appVersion: "3.4.1",
+          status: "healthy", // healthy | degraded | offline
+          lastSyncAt: faker.date.recent({ days: 1 }).toISOString(),
+          pendingPushes: 0,
+          syncedEntities: { products: 250, inventory: 4000, orders: 200 },
+        },
+      },
+      {
+        key: "mobile_sync_android",
+        valueJson: {
+          platform: "Android",
+          appVersion: "3.4.0",
+          status: "degraded",
+          lastSyncAt: faker.date.recent({ days: 2 }).toISOString(),
+          pendingPushes: 12,
+          syncedEntities: { products: 250, inventory: 3988, orders: 197 },
+        },
+      },
+    ],
   });
 
   // ── Summary ────────────────────────────────────────────────

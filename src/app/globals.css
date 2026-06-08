@@ -55,6 +55,14 @@
   --color-warning-foreground: var(--warning-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-chart-6: var(--chart-6);
+  --color-chart-7: var(--chart-7);
+  --color-chart-8: var(--chart-8);
 
   /* Restrained radius scale. */
   --radius-sm: calc(var(--radius) - 4px);
@@ -115,6 +123,19 @@
   --warning-foreground: oklch(0.3 0.04 60);
   --destructive: oklch(0.58 0.18 25);
   --destructive-foreground: oklch(0.99 0.003 60);
+
+  /* Chart categorical palette — a warm, on-brand sequence (rose, gold,
+     mauve, sage, terracotta, plum, blush, sand). Kept distinct in both
+     hue and lightness so series stay legible without relying on colour
+     alone, and tuned to the soft beauty/spa aesthetic. */
+  --chart-1: oklch(0.6 0.13 8); /* rose (primary family) */
+  --chart-2: oklch(0.72 0.1 70); /* gold (accent family) */
+  --chart-3: oklch(0.56 0.09 330); /* mauve */
+  --chart-4: oklch(0.66 0.08 160); /* sage */
+  --chart-5: oklch(0.62 0.12 40); /* terracotta */
+  --chart-6: oklch(0.5 0.09 300); /* plum */
+  --chart-7: oklch(0.74 0.07 20); /* blush */
+  --chart-8: oklch(0.68 0.06 90); /* sand */
 }
 
 @layer base {

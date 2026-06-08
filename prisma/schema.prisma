@@ -90,6 +90,13 @@ enum StockTransferStatus {
   COMPLETED
 }
 
+enum PurchaseOrderStatus {
+  DRAFT
+  ORDERED
+  RECEIVED
+  CANCELLED
+}
+
 enum CreditTransactionType {
   CHARGE
   PAYMENT
@@ -300,6 +307,7 @@ model Warehouse {
   transfersTo    StockTransfer[] @relation("TransferTo")
   orders         Order[]
   shipments      Shipment[]
+  purchaseOrders PurchaseOrder[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -341,6 +349,30 @@ model StockTransfer {
   @@index([fromWarehouseId])
   @@index([toWarehouseId])
   @@index([variantId])
+}
+
+// A basic inbound purchase order: supplier + destination warehouse + a
+// flat list of line items (sku, qty, unit cost) kept as JSON since the demo
+// only needs a lightweight PO log, not full procurement. status drives the
+// lifecycle; total is stored for the list view.
+model PurchaseOrder {
+  id          String              @id @default(cuid())
+  poNumber    String              @unique // format PO-2026-XXXX
+  supplier    String
+  warehouseId String
+  warehouse   Warehouse           @relation(fields: [warehouseId], references: [id])
+  status      PurchaseOrderStatus @default(DRAFT)
+  // [{ sku, name, quantity, unitCost }] — a simple line snapshot.
+  items       Json
+  total       Decimal             @db.Decimal(10, 2)
+  expectedAt  DateTime?
+  notes       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([warehouseId])
+  @@index([status])
 }
 
 // ─────────────────────────────────────────────────────────────
