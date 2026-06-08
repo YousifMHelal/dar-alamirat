@@ -696,5 +696,47 @@
       "invalid": "Please check the form.",
       "unknown": "Something went wrong. Please try again."
     }
+  },
+  "financials": {
+    "kpi": {
+      "totalRevenue": "Total revenue",
+      "vatCollected": "VAT collected",
+      "gatewayFees": "Gateway fees",
+      "reconciled": "Reconciled"
+    },
+    "reconciliation": {
+      "title": "Tabby & Tamara reconciliation",
+      "subtitle": "Match gateway settlements to payment records and flag fees.",
+      "run": "Run reconciliation",
+      "running": "Running…",
+      "tabbyLines": "Tabby settlements",
+      "tamaraLines": "Tamara settlements",
+      "matched": "Matched",
+      "unmatched": "Unmatched",
+      "totalFees": "Total fees (SAR)",
+      "totalNet": "Net remitted (SAR)",
+      "lastRun": "Last run",
+      "noData": "No reconciliation run yet. Click Run reconciliation to start.",
+      "order": "Order",
+      "gateway": "Gateway",
+      "gross": "Gross (SAR)",
+      "fee": "Fee (SAR)",
+      "net": "Net (SAR)",
+      "status": "Status",
+      "statusReconciled": "Reconciled",
+      "statusPending": "Pending"
+    },
+    "zatca": {
+      "title": "ZATCA Phase 2 e-Invoice",
+      "subtitle": "Generate a compliant UBL 2.1 XML invoice and TLV QR code for any order.",
+      "generate": "Generate invoice",
+      "generating": "Generating…",
+      "submissionStatus": "Submission status",
+      "noCsidNote": "ZATCA_CERT and ZATCA_CSID are not configured — invoice artifact is ready but submission is skipped. Drop in the real cert to go live.",
+      "qrLabel": "TLV QR code",
+      "qrHint": "Encoded per ZATCA QR spec v1.1 — scannable by any ZATCA-compliant app.",
+      "showXml": "View UBL XML",
+      "hideXml": "Hide XML"
+    }
   }
 }
