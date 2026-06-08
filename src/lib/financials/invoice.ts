@@ -90,27 +90,3 @@ export async function generateInvoiceForOrder(orderId: string): Promise<Generate
   };
 }
 
-/** Load financials KPIs: total payments, reconciled amounts, pending. */
-export async function getFinancialKpis() {
-  await requireUser();
-  const [payments, reconciled, vatTotal] = await Promise.all([
-    prisma.payment.aggregate({
-      where: { status: { in: ["PAID", "RECONCILED"] } },
-      _sum: { amount: true, gatewayFee: true },
-      _count: true,
-    }),
-    prisma.payment.count({ where: { status: "RECONCILED" } }),
-    prisma.order.aggregate({
-      where: { status: { not: "CANCELLED" } },
-      _sum: { vatAmount: true },
-    }),
-  ]);
-
-  return {
-    totalRevenue: payments._sum.amount?.toFixed(2) ?? "0.00",
-    totalFees: payments._sum.gatewayFee?.toFixed(2) ?? "0.00",
-    paymentCount: payments._count,
-    reconciledCount: reconciled,
-    vatCollected: vatTotal._sum.vatAmount?.toFixed(2) ?? "0.00",
-  };
-}

@@ -1,8 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { DollarSign } from "lucide-react";
 import type { Locale } from "@/i18n/routing";
-import { getFinancialKpis } from "@/lib/financials/invoice";
-import { getLastReconciliation } from "@/lib/financials/reconciliation";
+import { getFinancialKpis, getLastReconciliation } from "@/lib/financials/queries";
 import { prisma } from "@/lib/prisma";
 import { FinancialKpiCards } from "./kpi-cards";
 import { ReconciliationPanel } from "./reconciliation-panel";

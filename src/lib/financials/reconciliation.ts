@@ -53,16 +53,6 @@ export interface ReconciliationSummary {
 // Queries
 // ─────────────────────────────────────────────────────────────
 
-/** Load the last stored reconciliation summary from settings (for the dashboard). */
-export async function getLastReconciliation(): Promise<ReconciliationSummary | null> {
-  await requireUser();
-  const setting = await prisma.setting.findUnique({
-    where: { key: "reconciliation.last_run" },
-  });
-  if (!setting) return null;
-  return setting.valueJson as unknown as ReconciliationSummary;
-}
-
 /** Payments pending reconciliation (TABBY or TAMARA, status PAID). */
 export async function getPendingReconciliationPayments() {
   await requireUser();
