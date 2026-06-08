@@ -76,15 +76,15 @@ export function DateRangeFilter({
   const presets: Preset[] = ["last30", "last90", "ytd", "all"];
 
   return (
-    <div className="bg-card shadow-soft border-border flex flex-col gap-3 rounded-2xl border p-4 lg:flex-row lg:items-end lg:justify-between">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:gap-3">
+    <div className="bg-card shadow-soft border-border flex flex-col gap-3 rounded-2xl border p-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
         <div className="text-muted-foreground flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
           <CalendarRange className="size-4" />
-          {t("label")}
+          <span className="whitespace-nowrap">{t("label")}</span>
           {isPending && <Loader2 className="size-3.5 animate-spin" />}
         </div>
-        <label className="flex flex-col gap-1">
-          <span className="text-muted-foreground text-xs">{t("from")}</span>
+        <label className="flex items-center gap-2">
+          <span className="text-muted-foreground text-xs whitespace-nowrap">{t("from")}</span>
           <input
             type="date"
             value={from}
@@ -98,8 +98,8 @@ export function DateRangeFilter({
             aria-label={t("from")}
           />
         </label>
-        <label className="flex flex-col gap-1">
-          <span className="text-muted-foreground text-xs">{t("to")}</span>
+        <label className="flex items-center gap-2">
+          <span className="text-muted-foreground text-xs whitespace-nowrap">{t("to")}</span>
           <input
             type="date"
             value={to}

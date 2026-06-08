@@ -159,10 +159,10 @@ export function SalesOverTimeChart({
               <YAxis
                 orientation={rtl ? "right" : "left"}
                 tickFormatter={(v: number) => compactSar(v, locale)}
-                tick={{ fill: theme.axis, fontSize: 11 }}
+                tick={{ fill: theme.axis, fontSize: 11, textAnchor: "end" }}
                 axisLine={false}
                 tickLine={false}
-                width={64}
+                width={rtl ? 80 : 64}
               />
               <Tooltip
                 content={tooltipContent(theme, locale)}
@@ -235,10 +235,10 @@ export function SalesByCategoryChart({
                 type="category"
                 dataKey="name"
                 orientation={rtl ? "right" : "left"}
-                tick={{ fill: theme.axis, fontSize: 12 }}
+                tick={{ fill: theme.axis, fontSize: 12, textAnchor: "end" }}
                 axisLine={false}
                 tickLine={false}
-                width={96}
+                width={rtl ? 140 : 96}
               />
               <Tooltip
                 content={tooltipContent(theme, locale)}
@@ -379,10 +379,10 @@ export function TopProductsChart({
                 type="category"
                 dataKey="name"
                 orientation={rtl ? "right" : "left"}
-                tick={{ fill: theme.axis, fontSize: 11 }}
+                tick={{ fill: theme.axis, fontSize: 11, textAnchor: "end" }}
                 axisLine={false}
                 tickLine={false}
-                width={150}
+                width={rtl ? 170 : 150}
               />
               <Tooltip
                 content={tooltipContent(theme, locale)}

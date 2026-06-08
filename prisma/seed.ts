@@ -177,19 +177,19 @@ async function clearAll() {
 
   await prisma.stockTransfer.deleteMany();
   await prisma.inventoryItem.deleteMany();
+  await prisma.purchaseOrder.deleteMany();
 
   await prisma.creditTransaction.deleteMany();
   await prisma.creditAccount.deleteMany();
   await prisma.tierPrice.deleteMany();
 
   await prisma.seoMeta.deleteMany();
-  await prisma.orderItem.deleteMany();
   await prisma.productVariant.deleteMany();
   await prisma.product.deleteMany();
   await prisma.category.deleteMany();
 
-  await prisma.pricingTier.deleteMany();
   await prisma.customer.deleteMany();
+  await prisma.pricingTier.deleteMany();
   await prisma.warehouse.deleteMany();
 
   await prisma.redirect.deleteMany();
