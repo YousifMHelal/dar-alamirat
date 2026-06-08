@@ -1,9 +1,16 @@
 // Dar Al-Amirat Operations Portal — Prisma schema.
 //
-// Phase 0: connection only. No domain models yet — products, orders,
-// inventory, etc. arrive in later phases. The schema stays effectively
-// empty so `prisma generate` succeeds and the health route can run a
-// trivial `SELECT 1` against Neon.
+// Phase 1: the full domain model. Auth/people, catalog, B2B pricing,
+// inventory & warehouses, orders & fulfillment, and SEO/settings — all
+// defined in one pass so later phases (auth, routing, dashboards) build
+// on a stable schema. No auth *logic* lives here yet; the User/Role
+// models exist so the schema is complete.
+//
+// Conventions:
+//   - All ids are cuid; every model has createdAt/updatedAt.
+//   - Money is always Decimal(10,2) — never Float.
+//   - KSA VAT is 15%; orders store subtotal/vatAmount/total explicitly.
+//   - Fixed sets are enums (roles, statuses, carriers, methods, …).
 //
 // Prisma 7: the `prisma-client` generator emits an ESM/CJS client into
 // an explicit output dir, and the connection URL lives in
@@ -18,4 +25,449 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  MANAGER
+  B2B_SALON
+}
+
+enum CustomerType {
+  RETAIL
+  B2B_SALON
+}
+
+enum OrderType {
+  RETAIL
+  WHOLESALE
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  MADA
+  TABBY
+  TAMARA
+  CREDIT_CARD
+  B2B_CREDIT
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  RECONCILED
+  FAILED
+}
+
+enum ShipmentStatus {
+  PENDING
+  IN_TRANSIT
+  DELIVERED
+  RETURNED
+}
+
+enum Carrier {
+  ARAMEX
+  SMSA
+  SPL
+}
+
+enum StockTransferStatus {
+  PENDING
+  IN_TRANSIT
+  COMPLETED
+}
+
+enum CreditTransactionType {
+  CHARGE
+  PAYMENT
+}
+
+enum RedirectType {
+  PERMANENT_301
+  TEMPORARY_302
+}
+
+// ─────────────────────────────────────────────────────────────
+// Auth & people
+// ─────────────────────────────────────────────────────────────
+
+model User {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  hashedPassword String
+  name           String
+  role           Role     @default(MANAGER)
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Customer {
+  id            String       @id @default(cuid())
+  name          String
+  phone         String       @unique // CRM lookup key (Phase 3)
+  email         String?
+  type          CustomerType @default(RETAIL)
+  city          String
+  addressLine   String
+  // Geo coords are REQUIRED on every customer — Phase 3 routing needs
+  // real coordinates to compute nearest-warehouse assignment.
+  latitude      Float
+  longitude     Float
+  crmNotes      String? // the "merchant notebook" — free text
+  loyaltyPoints Int          @default(0)
+
+  // B2B_SALON customers link to one credit account and one pricing tier.
+  creditAccount CreditAccount?
+  pricingTierId String?
+  pricingTier   PricingTier?   @relation(fields: [pricingTierId], references: [id])
+
+  orders Order[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([pricingTierId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Catalog
+// ─────────────────────────────────────────────────────────────
+
+model Category {
+  id     String @id @default(cuid())
+  nameAr String
+  nameEn String
+  slug   String @unique
+
+  // Optional self-relation for parent/child categories.
+  parentId String?
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryTree")
+
+  products Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([parentId])
+}
+
+model Product {
+  id            String  @id @default(cuid())
+  nameAr        String
+  nameEn        String
+  descriptionAr String?
+  descriptionEn String?
+  sku           String  @unique
+  brand         String
+  basePrice     Decimal @db.Decimal(10, 2) // retail price
+  active        Boolean @default(true)
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  variants   ProductVariant[]
+  tierPrices TierPrice[]
+  seoMeta    SeoMeta?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([brand])
+}
+
+model ProductVariant {
+  id            String   @id @default(cuid())
+  productId     String
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  // Attributes for color + capacity.
+  colorName     String?
+  colorHex      String?
+  capacity      String? // e.g. "50ml"
+  variantSku    String   @unique
+  priceOverride Decimal? @db.Decimal(10, 2)
+  barcode       String?
+
+  inventoryItems InventoryItem[]
+  tierPrices     TierPrice[]
+  orderItems     OrderItem[]
+  stockTransfers StockTransfer[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// B2B pricing
+// ─────────────────────────────────────────────────────────────
+
+model PricingTier {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+
+  tierPrices TierPrice[]
+  customers  Customer[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TierPrice {
+  id            String      @id @default(cuid())
+  pricingTierId String
+  pricingTier   PricingTier @relation(fields: [pricingTierId], references: [id], onDelete: Cascade)
+
+  // Tier price may target a product (default for all its variants) or a
+  // specific variant. At least one of these is set.
+  productId String?
+  product   Product?        @relation(fields: [productId], references: [id])
+  variantId String?
+  variant   ProductVariant? @relation(fields: [variantId], references: [id])
+
+  wholesalePrice Decimal @db.Decimal(10, 2)
+  moq            Int // minimum order quantity
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([pricingTierId, productId])
+  @@index([pricingTierId])
+  @@index([productId])
+  @@index([variantId])
+}
+
+model CreditAccount {
+  id          String   @id @default(cuid())
+  customerId  String   @unique
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  creditLimit Decimal  @db.Decimal(10, 2)
+  balance     Decimal  @default(0) @db.Decimal(10, 2) // outstanding
+
+  transactions CreditTransaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CreditTransaction {
+  id              String                @id @default(cuid())
+  creditAccountId String
+  creditAccount   CreditAccount         @relation(fields: [creditAccountId], references: [id], onDelete: Cascade)
+  type            CreditTransactionType
+  amount          Decimal               @db.Decimal(10, 2)
+  note            String?
+  date            DateTime              @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([creditAccountId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Inventory & warehouses
+// ─────────────────────────────────────────────────────────────
+
+model Warehouse {
+  id        String @id @default(cuid())
+  name      String
+  code      String @unique
+  city      String
+  // Geo coords are REQUIRED — Phase 3 routing depends on them.
+  latitude  Float
+  longitude Float
+
+  inventoryItems InventoryItem[]
+  transfersFrom  StockTransfer[] @relation("TransferFrom")
+  transfersTo    StockTransfer[] @relation("TransferTo")
+  orders         Order[]
+  shipments      Shipment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model InventoryItem {
+  id          String         @id @default(cuid())
+  warehouseId String
+  warehouse   Warehouse      @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  variantId   String
+  variant     ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  quantityOnHand Int @default(0)
+  reorderLevel   Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // One stock row per (warehouse, variant) — the stock matrix.
+  @@unique([warehouseId, variantId])
+  @@index([variantId])
+}
+
+model StockTransfer {
+  id              String              @id @default(cuid())
+  fromWarehouseId String
+  fromWarehouse   Warehouse           @relation("TransferFrom", fields: [fromWarehouseId], references: [id])
+  toWarehouseId   String
+  toWarehouse     Warehouse           @relation("TransferTo", fields: [toWarehouseId], references: [id])
+  variantId       String
+  variant         ProductVariant      @relation(fields: [variantId], references: [id])
+  quantity        Int
+  status          StockTransferStatus @default(PENDING)
+  date            DateTime            @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([fromWarehouseId])
+  @@index([toWarehouseId])
+  @@index([variantId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Orders & fulfillment
+// ─────────────────────────────────────────────────────────────
+
+model Order {
+  id          String      @id @default(cuid())
+  orderNumber String      @unique // format DA-2026-XXXX
+  customerId  String
+  customer    Customer    @relation(fields: [customerId], references: [id])
+  type        OrderType
+  status      OrderStatus @default(PENDING)
+
+  subtotal  Decimal @db.Decimal(10, 2)
+  vatAmount Decimal @db.Decimal(10, 2)
+  total     Decimal @db.Decimal(10, 2)
+
+  // Filled by Phase 3 routing; nullable until then.
+  assignedWarehouseId String?
+  assignedWarehouse   Warehouse? @relation(fields: [assignedWarehouseId], references: [id])
+
+  placedAt DateTime @default(now())
+
+  items     OrderItem[]
+  shipments Shipment[]
+  payments  Payment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([customerId])
+  @@index([assignedWarehouseId])
+  @@index([status])
+}
+
+model OrderItem {
+  id        String         @id @default(cuid())
+  orderId   String
+  order     Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variantId String
+  variant   ProductVariant @relation(fields: [variantId], references: [id])
+
+  quantity  Int
+  unitPrice Decimal @db.Decimal(10, 2) // price actually charged (retail or wholesale)
+  lineTotal Decimal @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([variantId])
+}
+
+model Shipment {
+  id      String @id @default(cuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  // Order splitting: an order can have multiple shipments, each from a
+  // different warehouse.
+  warehouseId String?
+  warehouse   Warehouse? @relation(fields: [warehouseId], references: [id])
+
+  carrier         Carrier
+  waybillNumber   String?
+  status          ShipmentStatus @default(PENDING)
+  trackingUpdates Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([warehouseId])
+}
+
+model Payment {
+  id      String @id @default(cuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  method     PaymentMethod
+  amount     Decimal       @db.Decimal(10, 2)
+  status     PaymentStatus @default(PENDING)
+  gatewayFee Decimal?      @db.Decimal(10, 2)
+  settledAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orderId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// SEO & settings
+// ─────────────────────────────────────────────────────────────
+
+model Redirect {
+  id       String       @id @default(cuid())
+  fromPath String       @unique
+  toPath   String
+  type     RedirectType @default(PERMANENT_301)
+  active   Boolean      @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SeoMeta {
+  id        String  @id @default(cuid())
+  productId String  @unique
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  metaTitle       String
+  metaDescription String
+  keywords        String
+  jsonLd          Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Setting {
+  id        String @id @default(cuid())
+  key       String @unique
+  valueJson Json // integration config — placeholder values only; real keys come later
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
