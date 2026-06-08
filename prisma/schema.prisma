@@ -1,0 +1,21 @@
+// Dar Al-Amirat Operations Portal — Prisma schema.
+//
+// Phase 0: connection only. No domain models yet — products, orders,
+// inventory, etc. arrive in later phases. The schema stays effectively
+// empty so `prisma generate` succeeds and the health route can run a
+// trivial `SELECT 1` against Neon.
+//
+// Prisma 7: the `prisma-client` generator emits an ESM/CJS client into
+// an explicit output dir, and the connection URL lives in
+// prisma.config.ts (passed to the client via a driver adapter), not
+// here in the datasource block.
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}

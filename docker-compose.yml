@@ -1,0 +1,29 @@
+# Local development database for the Dar Al-Amirat Operations Portal.
+#
+# This stands in for the hosted Neon Postgres during development. The app
+# connects through DATABASE_URL exactly the same way, so moving to a
+# hosted DB later is purely an env change — no app or Prisma code edits.
+services:
+  db:
+    image: postgres:16
+    container_name: daralamirat-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: daralamirat
+      POSTGRES_PASSWORD: daralamirat_dev
+      POSTGRES_DB: daralamirat
+    ports:
+      - "5432:5432"
+    volumes:
+      # Named volume so data survives container restarts / recreation.
+      - daralamirat_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # Reports healthy only once Postgres actually accepts connections.
+      test: ["CMD-SHELL", "pg_isready -U daralamirat -d daralamirat"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  daralamirat_pgdata:

@@ -1,0 +1,74 @@
+{
+  "brand": {
+    "name": "Dar Al-Amirat",
+    "tagline": "Operations Portal"
+  },
+  "nav": {
+    "sectionMain": "Workspace",
+    "overview": "Overview & BI Analytics",
+    "content": "Content & App Layout",
+    "catalog": "Items & Catalog (B2B)",
+    "inventory": "Inventory & Warehouses",
+    "orders": "Delivery & OMS",
+    "seo": "SEO Engine",
+    "financials": "Financials & VAT",
+    "settings": "Settings & Integrations"
+  },
+  "shell": {
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "primaryNavigation": "Primary navigation"
+  },
+  "language": {
+    "label": "Language",
+    "switchTo": "العربية",
+    "ar": "العربية",
+    "en": "English"
+  },
+  "user": {
+    "menu": "Account menu",
+    "name": "Amira Al-Saud",
+    "role": "Operations Lead",
+    "profile": "Profile",
+    "preferences": "Preferences",
+    "signOut": "Sign out"
+  },
+  "modules": {
+    "comingSoon": "Coming in a later phase",
+    "comingSoonBody": "This module is part of the platform roadmap and will be activated in an upcoming phase. The foundation, navigation, and theming are ready.",
+    "overview": {
+      "title": "Overview & BI Analytics",
+      "description": "Executive dashboards, KPIs, and business intelligence across every channel."
+    },
+    "content": {
+      "title": "Content & App Layout",
+      "description": "Compose the storefront and mobile app — banners, sections, and merchandising."
+    },
+    "catalog": {
+      "title": "Items & Catalog (B2B)",
+      "description": "Manage products, variants, pricing tiers, and wholesale catalog structure."
+    },
+    "inventory": {
+      "title": "Inventory & Warehouses",
+      "description": "Track stock levels, branches, and warehouse movements in real time."
+    },
+    "orders": {
+      "title": "Delivery & OMS",
+      "description": "Orchestrate orders, fulfilment, and intelligent delivery routing."
+    },
+    "seo": {
+      "title": "SEO Engine",
+      "description": "Optimise visibility — metadata, sitemaps, and search performance."
+    },
+    "financials": {
+      "title": "Financials & VAT",
+      "description": "Reconcile revenue, manage VAT, and stay aligned with ZATCA requirements."
+    },
+    "settings": {
+      "title": "Settings & Integrations",
+      "description": "Configure workspaces, roles, and connections to external systems."
+    }
+  }
+}

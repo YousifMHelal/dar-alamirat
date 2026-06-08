@@ -1,0 +1,172 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* ─────────────────────────────────────────────────────────────
+   Design tokens — single source of truth for the whole portal.
+   Every surface, every later phase, pulls from these variables.
+
+   Direction: refined editorial light mode for a premium beauty
+   brand. Warm off-white surfaces (not flat gray), a muted
+   mauve/rose accent used sparingly, soft layered depth.
+   Colors are authored in OKLCH for perceptually even steps.
+   ───────────────────────────────────────────────────────────── */
+@theme inline {
+  /* Font families. --font-latin / --font-arabic are set per-locale on
+     <html> by the locale layout; --font-display comes from next/font. */
+  --font-sans:
+    var(--font-latin), var(--font-arabic), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display), Georgia, "Times New Roman", serif;
+
+  /* Map semantic tokens into Tailwind's color namespace so utilities
+     like bg-background / text-foreground / border-border just work. */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-sidebar-active: var(--sidebar-active);
+  --color-sidebar-active-foreground: var(--sidebar-active-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  /* Restrained radius scale. */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+
+  /* Soft layered shadows — warm-tinted, not harsh black. */
+  --shadow-soft:
+    0 1px 2px oklch(0.45 0.04 25 / 0.04), 0 4px 12px oklch(0.45 0.04 25 / 0.05);
+  --shadow-elevated:
+    0 2px 4px oklch(0.45 0.04 25 / 0.05), 0 12px 28px oklch(0.45 0.04 25 / 0.08);
+  --shadow-accent: 0 6px 20px oklch(0.58 0.09 12 / 0.18);
+}
+
+:root {
+  --radius: 0.75rem;
+
+  /* Surfaces — warm paper-white, faint rose undertone. */
+  --background: oklch(0.985 0.005 60);
+  --foreground: oklch(0.27 0.02 30);
+  --surface: oklch(1 0 0);
+  --surface-muted: oklch(0.975 0.008 50);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.27 0.02 30);
+
+  /* Accent — muted mauve/rose. Confident but not loud. */
+  --primary: oklch(0.55 0.1 8);
+  --primary-foreground: oklch(0.99 0.003 60);
+  --primary-soft: oklch(0.95 0.025 12);
+
+  /* Secondary accent — warm bronze, used for highlights/illustration. */
+  --accent: oklch(0.7 0.07 55);
+  --accent-foreground: oklch(0.27 0.02 30);
+
+  --muted: oklch(0.965 0.008 50);
+  --muted-foreground: oklch(0.52 0.02 35);
+
+  --border: oklch(0.92 0.008 50);
+  --border-strong: oklch(0.87 0.012 45);
+  --input: oklch(0.92 0.008 50);
+  --ring: oklch(0.55 0.1 8);
+
+  /* Sidebar — slightly deeper warm surface so it reads as a panel. */
+  --sidebar: oklch(0.978 0.008 50);
+  --sidebar-foreground: oklch(0.34 0.02 30);
+  --sidebar-muted: oklch(0.55 0.02 35);
+  --sidebar-active: oklch(0.95 0.025 12);
+  --sidebar-active-foreground: oklch(0.45 0.12 8);
+  --sidebar-border: oklch(0.92 0.008 50);
+
+  /* Status colors. */
+  --success: oklch(0.62 0.11 155);
+  --success-foreground: oklch(0.99 0.003 60);
+  --warning: oklch(0.78 0.12 75);
+  --warning-foreground: oklch(0.3 0.04 60);
+  --destructive: oklch(0.58 0.18 25);
+  --destructive-foreground: oklch(0.99 0.003 60);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Display face for editorial headings. RTL Arabic keeps the sans
+     family — Playfair has no Arabic glyphs — handled via .font-display
+     being applied only where Latin headings render, plus the sans
+     fallback chain above. */
+  h1,
+  h2,
+  h3 {
+    @apply tracking-tight;
+  }
+
+  /* Tabular figures for any numeric/data display. */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  ::selection {
+    background: var(--primary-soft);
+    color: var(--primary);
+  }
+}
+
+@layer utilities {
+  /* Editorial serif display, Latin only. In Arabic we intentionally
+     fall back to the Arabic sans for correct shaping. */
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  /* Thin, warm scrollbar that matches the surface palette. */
+  .scrollbar-subtle {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+}
