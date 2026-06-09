@@ -279,7 +279,8 @@ export async function searchProductsAction(
     return { ok: true, products };
   } catch (err) {
     console.error("searchProductsAction failed", err);
-    return { ok: false, error: "search_failed" };
+    const message = err instanceof Error ? err.message : String(err);
+    return { ok: false, error: message };
   }
 }
 

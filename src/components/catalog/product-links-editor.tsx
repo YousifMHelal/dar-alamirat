@@ -41,7 +41,7 @@ function LinksSection({ productId, type, initial, locale }: SectionProps) {
         const excluded = [productId, ...selectedIds];
         const res = await searchProductsAction(query, excluded);
         setResults(res.ok ? res.products : []);
-        if (!res.ok) toast(t("searchError"), "error");
+        if (!res.ok) toast(`${t("searchError")} (${res.error})`, "error");
       } catch {
         setResults([]);
         toast(t("searchError"), "error");
