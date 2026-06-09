@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { UserCog, Mail } from "lucide-react";
+import { UserCog, Mail, Pencil, UserPlus } from "lucide-react";
 import type { Locale } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 import { requireModuleAccess } from "@/lib/auth/guard";
 import { listStaff } from "@/lib/staff/queries";
 import { CatalogHeader } from "@/components/catalog/page-header";
 import { RoleFilter } from "@/components/staff/role-filter";
+import { StaffDialog } from "@/components/staff/staff-dialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 const MODULE_KEY = "staff";
 
@@ -65,7 +67,19 @@ export default async function StaffPage({
     <div className="flex flex-col gap-6">
       <CatalogHeader title={t("title")} subtitle={t("subtitle")} icon={UserCog} />
 
-      <RoleFilter current={sp.role ?? ""} />
+      <RoleFilter
+        current={sp.role ?? ""}
+        addButton={
+          <StaffDialog
+            trigger={
+              <Button size="md">
+                <UserPlus />
+                {t("addStaff")}
+              </Button>
+            }
+          />
+        }
+      />
 
       {rows.length === 0 ? (
         <EmptyState title={t("empty.title")} body={t("empty.body")} />
@@ -79,6 +93,7 @@ export default async function StaffPage({
                   <th className="px-4 py-3 text-start font-semibold">{t("table.email")}</th>
                   <th className="px-4 py-3 text-start font-semibold">{t("table.role")}</th>
                   <th className="px-4 py-3 text-start font-semibold">{t("table.status")}</th>
+                  <th className="px-4 py-3 text-start font-semibold">{t("table.actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -103,6 +118,16 @@ export default async function StaffPage({
                       ) : (
                         <Badge tone="neutral">{t("table.inactive")}</Badge>
                       )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <StaffDialog
+                        staff={u}
+                        trigger={
+                          <Button variant="ghost" size="icon-sm" aria-label={t("table.edit")}>
+                            <Pencil />
+                          </Button>
+                        }
+                      />
                     </td>
                   </tr>
                 ))}

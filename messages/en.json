@@ -1091,13 +1091,16 @@
       "MANAGER": "Operations Manager",
       "B2B_SALON": "Salon Partner"
     },
+    "addStaff": "Add Staff",
     "table": {
       "name": "Name",
       "email": "Email",
       "role": "Role",
       "status": "Status",
       "active": "Active",
-      "inactive": "Inactive"
+      "inactive": "Inactive",
+      "actions": "Actions",
+      "edit": "Edit staff member"
     },
     "empty": {
       "title": "No staff accounts found",
@@ -1108,6 +1111,38 @@
       "page": "Page {page} of {pageCount}",
       "prev": "Previous",
       "next": "Next"
+    },
+    "form": {
+      "addTitle": "Add Staff Member",
+      "editTitle": "Edit Staff Member",
+      "name": "Full Name",
+      "namePlaceholder": "e.g. Sarah Al-Amiri",
+      "email": "Email Address",
+      "role": "Role",
+      "password": "Password",
+      "passwordOptional": "New Password",
+      "passwordOptionalPlaceholder": "Leave blank to keep unchanged",
+      "passwordHint": "Leave blank to keep the current password.",
+      "save": "Save Changes",
+      "saving": "Saving…",
+      "create": "Create Account",
+      "creating": "Creating…",
+      "cancel": "Cancel",
+      "close": "Close",
+      "saved": "Changes saved.",
+      "created": "Staff account created.",
+      "activated": "Account activated.",
+      "deactivated": "Account deactivated.",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "errors": {
+        "nameRequired": "Name is required.",
+        "emailInvalid": "Please enter a valid email address.",
+        "passwordTooShort": "Password must be at least 8 characters.",
+        "emailTaken": "This email is already in use.",
+        "notFound": "Staff member not found.",
+        "unknown": "Something went wrong. Please try again."
+      }
     }
   },
   "shipping": {
