@@ -19,7 +19,7 @@ import {
 import { createAramexShipment } from "@/lib/integrations/aramex";
 import { createSmsaShipment } from "@/lib/integrations/smsa";
 import { createSplShipment } from "@/lib/integrations/spl";
-import type { Carrier, OrderStatus } from "@/generated/prisma/enums";
+import type { Carrier, OrderStatus, ShipmentStatus } from "@/generated/prisma/enums";
 
 // ─────────────────────────────────────────────────────────────
 // Update order status + fire WhatsApp notification
@@ -42,18 +42,36 @@ export async function updateOrderStatus(
       id: true,
       orderNumber: true,
       status: true,
-      customer: { select: { name: true, phone: true } },
+      customer: { select: { id: true, name: true, phone: true } },
       shipments: { select: { waybillNumber: true }, take: 1 },
     },
   });
 
   if (!order) return { ok: false, error: "orderNotFound" };
 
-  // Persist the status change.
-  await prisma.order.update({
-    where: { id: orderId },
-    data: { status: newStatus },
-  });
+  // Persist the status change, and atomically award loyalty points when the
+  // order reaches DELIVERED (1 point per 1 SAR of subtotal, rounded down).
+  if (newStatus === "DELIVERED") {
+    await prisma.$transaction(async (tx) => {
+      const fullOrder = await tx.order.findUnique({
+        where: { id: orderId },
+        select: { subtotal: true },
+      });
+      const pointsToAward = fullOrder ? Math.floor(Number(fullOrder.subtotal)) : 0;
+      await tx.order.update({ where: { id: orderId }, data: { status: newStatus } });
+      if (pointsToAward > 0) {
+        await tx.customer.update({
+          where: { id: order.customer.id },
+          data: { loyaltyPoints: { increment: pointsToAward } },
+        });
+      }
+    });
+  } else {
+    await prisma.order.update({
+      where: { id: orderId },
+      data: { status: newStatus },
+    });
+  }
 
   revalidatePath("/orders");
   revalidatePath(`/orders/${orderId}`);
@@ -254,4 +272,225 @@ export async function createShipmentWaybill(
   revalidatePath("/orders");
 
   return waybillResult;
+}
+
+// ─────────────────────────────────────────────────────────────
+// Update a single shipment's status
+// ─────────────────────────────────────────────────────────────
+
+export type UpdateShipmentStatusResult =
+  | { ok: true; whatsapp: "sent" | "skipped" | "failed"; whatsappError?: string }
+  | { ok: false; error: string };
+
+export async function updateShipmentStatus(
+  shipmentId: string,
+  newStatus: ShipmentStatus,
+  locale: "en" | "ar" = "en",
+): Promise<UpdateShipmentStatusResult> {
+  await requireUser();
+
+  const shipment = await prisma.shipment.findUnique({
+    where: { id: shipmentId },
+    select: {
+      id: true,
+      waybillNumber: true,
+      carrier: true,
+      order: {
+        select: {
+          id: true,
+          orderNumber: true,
+          subtotal: true,
+          customer: { select: { id: true, name: true, phone: true } },
+          shipments: { select: { id: true, status: true } },
+        },
+      },
+    },
+  });
+
+  if (!shipment) return { ok: false, error: "shipmentNotFound" };
+
+  await prisma.shipment.update({
+    where: { id: shipmentId },
+    data: { status: newStatus },
+  });
+
+  // When this shipment is now DELIVERED, check if all shipments are delivered
+  // → if so, mark the order DELIVERED and award loyalty points.
+  if (newStatus === "DELIVERED") {
+    const allDelivered = shipment.order.shipments.every(
+      (s) => s.id === shipmentId || s.status === "DELIVERED",
+    );
+    if (allDelivered) {
+      await prisma.$transaction(async (tx) => {
+        const pointsToAward = Math.floor(Number(shipment.order.subtotal));
+        await tx.order.update({
+          where: { id: shipment.order.id },
+          data: { status: "DELIVERED" },
+        });
+        if (pointsToAward > 0) {
+          await tx.customer.update({
+            where: { id: shipment.order.customer.id },
+            data: { loyaltyPoints: { increment: pointsToAward } },
+          });
+        }
+      });
+    }
+  }
+
+  revalidatePath("/orders");
+  revalidatePath(`/orders/${shipment.order.id}`);
+
+  // WhatsApp notification — non-critical, won't roll back the status update.
+  const { ORDER_STATUS_LABELS } = await import("@/lib/integrations/whatsapp");
+  const statusLabels = ORDER_STATUS_LABELS[newStatus as keyof typeof ORDER_STATUS_LABELS];
+  const statusLabel =
+    statusLabels
+      ? locale === "ar"
+        ? (statusLabels as { ar: string }).ar
+        : (statusLabels as { en: string }).en
+      : newStatus;
+
+  const detail = shipment.waybillNumber
+    ? `${shipment.carrier} · ${shipment.waybillNumber}`
+    : undefined;
+
+  const waResult = await sendOrderStatusUpdate({
+    to: shipment.order.customer.phone,
+    customerName: shipment.order.customer.name,
+    orderNumber: shipment.order.orderNumber,
+    statusLabel,
+    detail,
+    locale,
+  });
+
+  if (!waResult.ok) {
+    return { ok: true, whatsapp: "failed", whatsappError: waResult.error };
+  }
+  return { ok: true, whatsapp: "sent" };
+}
+
+// ─────────────────────────────────────────────────────────────
+// Update a single shipment's carrier
+// ─────────────────────────────────────────────────────────────
+
+export type UpdateShipmentCarrierResult = { ok: true } | { ok: false; error: string };
+
+export async function updateShipmentCarrier(
+  shipmentId: string,
+  carrier: Carrier,
+): Promise<UpdateShipmentCarrierResult> {
+  await requireUser();
+
+  const shipment = await prisma.shipment.findUnique({
+    where: { id: shipmentId },
+    select: { id: true, waybillNumber: true, order: { select: { id: true } } },
+  });
+
+  if (!shipment) return { ok: false, error: "shipmentNotFound" };
+  if (shipment.waybillNumber) {
+    return { ok: false, error: "waybillAlreadyCreated" };
+  }
+
+  await prisma.shipment.update({ where: { id: shipmentId }, data: { carrier } });
+
+  revalidatePath("/orders");
+  revalidatePath(`/orders/${shipment.order.id}`);
+
+  return { ok: true };
+}
+
+// ─────────────────────────────────────────────────────────────
+// Manually split a shipment into two
+// ─────────────────────────────────────────────────────────────
+
+export interface SplitLine {
+  orderItemId: string;
+  quantity: number;
+}
+
+export type SplitShipmentResult =
+  | { ok: true; newShipmentId: string }
+  | { ok: false; error: string };
+
+export async function splitShipment(
+  shipmentId: string,
+  splitLines: SplitLine[],
+  newCarrier: Carrier,
+  newWarehouseId?: string,
+): Promise<SplitShipmentResult> {
+  await requireUser();
+
+  if (!splitLines.length) return { ok: false, error: "noLinesProvided" };
+
+  const shipment = await prisma.shipment.findUnique({
+    where: { id: shipmentId },
+    select: {
+      id: true,
+      orderId: true,
+      status: true,
+      items: { select: { id: true, orderItemId: true, quantity: true } },
+      order: { select: { id: true, status: true } },
+    },
+  });
+
+  if (!shipment) return { ok: false, error: "shipmentNotFound" };
+  if (shipment.order.status === "DELIVERED" || shipment.order.status === "CANCELLED") {
+    return { ok: false, error: "orderAlreadyFinalised" };
+  }
+  if (shipment.status === "DELIVERED" || shipment.status === "RETURNED") {
+    return { ok: false, error: "shipmentAlreadyFinalised" };
+  }
+
+  // Validate quantities don't exceed what's in the source shipment.
+  for (const sl of splitLines) {
+    const existing = shipment.items.find((i) => i.orderItemId === sl.orderItemId);
+    if (!existing) return { ok: false, error: `itemNotInShipment:${sl.orderItemId}` };
+    if (sl.quantity <= 0 || sl.quantity > existing.quantity) {
+      return { ok: false, error: `invalidQuantity:${sl.orderItemId}` };
+    }
+  }
+
+  const newShipment = await prisma.$transaction(async (tx) => {
+    const created = await tx.shipment.create({
+      data: {
+        orderId: shipment.orderId,
+        carrier: newCarrier,
+        status: "PENDING",
+        warehouseId: newWarehouseId ?? null,
+      },
+      select: { id: true },
+    });
+
+    for (const sl of splitLines) {
+      const source = shipment.items.find((i) => i.orderItemId === sl.orderItemId)!;
+      const remaining = source.quantity - sl.quantity;
+
+      // Create ShipmentItem on the new shipment.
+      await tx.shipmentItem.create({
+        data: {
+          shipmentId: created.id,
+          orderItemId: sl.orderItemId,
+          quantity: sl.quantity,
+        },
+      });
+
+      if (remaining > 0) {
+        // Reduce quantity on the source ShipmentItem.
+        await tx.shipmentItem.update({
+          where: { id: source.id },
+          data: { quantity: remaining },
+        });
+      } else {
+        // Remove from source shipment entirely.
+        await tx.shipmentItem.delete({ where: { id: source.id } });
+      }
+    }
+
+    return created;
+  });
+
+  revalidatePath("/orders");
+  revalidatePath(`/orders/${shipment.order.id}`);
+
+  return { ok: true, newShipmentId: newShipment.id };
 }

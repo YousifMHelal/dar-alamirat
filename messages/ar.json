@@ -33,7 +33,10 @@
     "giftCards": "بطاقات الهدايا",
     "performance": "أداء المتجر",
     "notifications": "الإشعارات",
-    "support": "مركز المساعدة والدعم"
+    "support": "مركز المساعدة والدعم",
+    "campaigns": "الحملات التسويقية",
+    "shadeFinder": "مستشار التجميل الذكي",
+    "section_tools": "الأدوات"
   },
   "shell": {
     "collapseSidebar": "طيّ القائمة الجانبية",
@@ -171,6 +174,14 @@
     "support": {
       "title": "مركز المساعدة والدعم",
       "description": "تابع تذاكر دعم العملاء والرد عليها من مكان واحد."
+    },
+    "campaigns": {
+      "title": "الحملات والباقات",
+      "description": "أنشئ حملات تجميع المنتجات لرمضان واليوم الوطني والعيد وغيرها من المناسبات."
+    },
+    "shadeFinder": {
+      "title": "مستشار التجميل بالذكاء الاصطناعي",
+      "description": "اختبار مدعوم بالذكاء الاصطناعي لمطابقة الموظفين أو العملاء مع درجة الأساس والكونسيلر المناسبة."
     }
   },
   "orders": {
@@ -224,7 +235,10 @@
       "placedAt": "تاريخ الطلب",
       "items": "أصناف",
       "unassigned": "غير مُسند",
-      "split": "مقسّم"
+      "split": "مقسّم",
+      "compliance": "فاتورة إلكترونية",
+      "invoiceIssued": "صادرة",
+      "invoiceNotIssued": "غير صادرة"
     },
     "empty": {
       "title": "لا توجد طلبات",
@@ -249,6 +263,7 @@
       "subtotal": "المجموع الفرعي",
       "vat": "ضريبة القيمة المضافة (15%)",
       "total": "الإجمالي",
+      "vatInclusiveLabel": "السعر شامل ضريبة القيمة المضافة 15%",
       "customer": "العميل",
       "crmNotes": "ملاحظات العميل",
       "noNotes": "لا توجد ملاحظات.",
@@ -262,7 +277,42 @@
       "assignedWarehouse": "المستودع المُسند",
       "fromWarehouse": "من {warehouse}",
       "waybill": "بوليصة الشحن",
-      "splitNote": "هذا الطلب مقسّم على {count} مستودعات."
+      "splitNote": "هذا الطلب مقسّم على {count} مستودعات.",
+      "shipmentItems": "محتويات الشحنة",
+      "changeCarrier": "تغيير الناقل",
+      "changeStatus": "تحديث الحالة",
+      "splitShipment": "تقسيم الشحنة",
+      "shipmentUpdated": "تم تحديث الشحنة",
+      "splitSuccess": "تم إنشاء الشحنة الجديدة",
+      "carrierChangeBlocked": "لا يمكن تغيير الناقل بعد إنشاء بوليصة الشحن.",
+      "splitDialog": {
+        "title": "تقسيم الشحنة",
+        "subtitle": "اختر المنتجات والكميات للنقل إلى شحنة جديدة.",
+        "newCarrier": "ناقل الشحنة الجديدة",
+        "newWarehouse": "مستودع الشحنة الجديدة (اختياري)",
+        "noWarehouse": "— بدون مستودع —",
+        "confirm": "تأكيد التقسيم",
+        "splitting": "جارٍ التقسيم…"
+      },
+      "zatca": {
+        "title": "فاتورة إلكترونية (زاتكا)",
+        "issue": "إصدار فاتورة إلكترونية",
+        "reissue": "إعادة إصدار الفاتورة",
+        "issuing": "جارٍ الإصدار…",
+        "issued": "تم إصدار الفاتورة الإلكترونية",
+        "qrLabel": "رمز QR بتشفير TLV",
+        "qrHint": "مُشفَّر وفق مواصفات زاتكا v1.1",
+        "showXml": "عرض XML (UBL)",
+        "hideXml": "إخفاء XML",
+        "noCsidNote": "لم يتم تكوين ZATCA_CERT وZATCA_CSID — الفاتورة جاهزة لكن التقديم لزاتكا متوقف.",
+        "status": {
+          "REPORTED": "مُبلَّغ",
+          "CLEARED": "مُخلَّص",
+          "WARNING": "تحذير",
+          "ERROR": "خطأ",
+          "LOCAL": "محلي فقط"
+        }
+      }
     },
     "form": {
       "title": "طلب جديد",
@@ -289,6 +339,7 @@
       "email": "البريد الإلكتروني (اختياري)",
       "tier": "فئة التسعير",
       "selectTier": "اختر فئة",
+      "vatNumber": "رقم التسجيل الضريبي",
       "save": "حفظ العميل",
       "saving": "جارٍ الحفظ…",
       "addItems": "إضافة أصناف",
@@ -306,7 +357,11 @@
       "subtotal": "المجموع الفرعي",
       "vat": "ضريبة القيمة المضافة (15%)",
       "total": "الإجمالي",
+      "vatInclusiveNote": "السعر شامل ضريبة القيمة المضافة 15%",
       "paymentMethod": "طريقة الدفع",
+      "redeemPoints": "استبدال {points} نقطة ولاء",
+      "redeemPointsHint": "توفير {discount} من إجمالي الطلب",
+      "pointsDiscount": "تم استبدال {points} نقطة",
       "placeOrder": "إرسال الطلب",
       "placing": "جارٍ إرسال الطلب…",
       "selectCustomerFirst": "اختر عميلاً للبدء.",
@@ -330,6 +385,7 @@
         "outOfStock": "بعض الأصناف غير متوفرة في أي مستودع.",
         "customerNotFound": "لم يتم العثور على العميل.",
         "variantNotFound": "تعذّر العثور على منتج أو أكثر.",
+        "credit_limit_exceeded": "هذا الطلب سيتجاوز الحد الائتماني للعميل.",
         "unknown": "حدث خطأ ما. حاول مرة أخرى."
       }
     }
@@ -1206,7 +1262,9 @@
     "kpi": {
       "totalPoints": "إجمالي النقاط المستحقة",
       "totalMembers": "إجمالي العملاء",
-      "activeMembers": "أعضاء لديهم نقاط"
+      "activeMembers": "أعضاء لديهم نقاط",
+      "awardedThisMonth": "النقاط الممنوحة هذا الشهر",
+      "redeemedThisMonth": "النقاط المستبدَلة هذا الشهر"
     },
     "type": {
       "RETAIL": "تجزئة",
@@ -1720,5 +1778,166 @@
       "empty": "لا توجد مبيعات منتجات في هذا النطاق."
     },
     "rangeNote": "عرض البيانات من {from} إلى {to}."
+  },
+  "shadeFinder": {
+    "title": "مستشار التجميل بالذكاء الاصطناعي",
+    "subtitle": "أجب على بضعة أسئلة سريعة وسيوصي Gemini بأفضل درجات الكونسيلر والأساس من كتالوجنا.",
+    "step": "الخطوة {current} من {total}",
+    "undertone": {
+      "question": "ما هو نبرة بشرتك؟",
+      "cool": "باردة",
+      "warm": "دافئة",
+      "neutral": "محايدة",
+      "coolHint": "يبدو عليك المجوهرات الفضية والألوان الوردية",
+      "warmHint": "يبدو عليك المجوهرات الذهبية والألوان الترابية",
+      "neutralHint": "يناسبك كل من الفضة والذهب"
+    },
+    "depth": {
+      "question": "ما درجة لون بشرتك؟",
+      "fair": "فاتح جداً",
+      "light": "فاتح",
+      "medium": "متوسط",
+      "tan": "قمحي",
+      "deep": "داكن"
+    },
+    "coverage": {
+      "question": "ما نوع التغطية التي تفضلها؟",
+      "light": "خفيفة",
+      "medium": "متوسطة",
+      "full": "كاملة",
+      "lightHint": "إطلالة طبيعية تشبه البشرة",
+      "mediumHint": "توحيد لون البشرة مع تغطية خفيفة",
+      "fullHint": "أقصى تغطية للحصول على إطلالة مثالية"
+    },
+    "finish": {
+      "question": "ما نوع الإنهاء الذي تفضله؟",
+      "matte": "مات",
+      "satin": "ساتان",
+      "dewy": "ندي",
+      "matteHint": "إنهاء مخملي خالٍ من اللمعان",
+      "satinHint": "إنهاء متوازن شبه مضيء",
+      "dewyHint": "إنهاء منعش ومتألق"
+    },
+    "back": "السابق",
+    "next": "التالي",
+    "findMyShade": "اعثر على ظلي",
+    "finding": "جارٍ البحث عن الظلال…",
+    "results": {
+      "title": "الظلال الموصى بها",
+      "subtitle": "بناءً على إجاباتك، يوصي Gemini بهذه المنتجات الـ{count} من كتالوجنا.",
+      "reasoning": "لماذا هذا الظل",
+      "addToOrder": "إضافة إلى طلب جديد",
+      "noResults": "لم يتم العثور على ظلال مناسبة في الكتالوج. جرّب تغيير إجاباتك.",
+      "tryAgain": "ابدأ من جديد"
+    },
+    "errors": {
+      "unknown": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
+    }
+  },
+  "campaigns": {
+    "title": "الحملات التسويقية",
+    "subtitle": "أنشئ حملات تجميع المنتجات للمناسبات الموسمية السعودية مع خصومات تلقائية.",
+    "newCampaign": "حملة جديدة",
+    "backToCampaigns": "العودة إلى الحملات",
+    "status": {
+      "ACTIVE": "نشطة",
+      "SCHEDULED": "مجدولة",
+      "EXPIRED": "منتهية"
+    },
+    "occasion": {
+      "label": "المناسبة",
+      "placeholder": "مثال: رمضان، اليوم الوطني، عيد الفطر",
+      "none": "بدون مناسبة"
+    },
+    "table": {
+      "name": "الحملة",
+      "occasion": "المناسبة",
+      "dateRange": "نطاق التاريخ",
+      "bundles": "الباقات",
+      "status": "الحالة",
+      "bundleCount": "{count} باقات"
+    },
+    "empty": {
+      "title": "لا توجد حملات بعد",
+      "body": "أنشئ حملتك الأولى لتجميع المنتجات مع خصومات تلقائية للمناسبات الموسمية."
+    },
+    "pagination": {
+      "showing": "{count} من {total} حملة",
+      "page": "صفحة {page} من {pageCount}",
+      "prev": "السابق",
+      "next": "التالي"
+    },
+    "form": {
+      "createTitle": "حملة جديدة",
+      "editTitle": "تعديل الحملة",
+      "createSubtitle": "أنشئ حملة مع باقات وخصومات.",
+      "editSubtitle": "تحديث تفاصيل الحملة والباقات.",
+      "sectionDetails": "تفاصيل الحملة",
+      "sectionBundles": "الباقات",
+      "nameEn": "الاسم (إنجليزي)",
+      "nameAr": "الاسم (عربي)",
+      "startsAt": "تاريخ البداية",
+      "endsAt": "تاريخ النهاية",
+      "isActive": "نشطة",
+      "isActiveHint": "الحملات غير النشطة لا تُطبَّق على طلبات الخصم.",
+      "addBundle": "إضافة باقة",
+      "bundle": "الباقة {n}",
+      "bundleNameEn": "اسم الباقة (إنجليزي)",
+      "bundleNameAr": "اسم الباقة (عربي)",
+      "discountType": "نوع الخصم",
+      "discountTypePercentage": "نسبة مئوية (%)",
+      "discountTypeFixed": "مبلغ ثابت (ريال)",
+      "discountValue": "قيمة الخصم",
+      "minOrderAmount": "الحد الأدنى للطلب (ريال)",
+      "minOrderAmountHint": "اتركه فارغاً لعدم تحديد حد أدنى.",
+      "bundleItems": "المنتجات في الباقة",
+      "addItem": "إضافة منتج",
+      "searchVariants": "بحث عن منتجات…",
+      "quantity": "الكمية",
+      "removeItem": "حذف",
+      "removeBundle": "حذف الباقة",
+      "noBundles": "لا توجد باقات بعد. أضف باقة لتحديد الخصم.",
+      "save": "حفظ الحملة",
+      "saving": "جارٍ الحفظ…",
+      "saved": "تم حفظ الحملة.",
+      "create": "إنشاء الحملة",
+      "creating": "جارٍ الإنشاء…",
+      "delete": "حذف",
+      "deleting": "جارٍ الحذف…",
+      "confirmDelete": "حذف هذه الحملة وجميع باقاتها؟ لا يمكن التراجع عن هذا الإجراء.",
+      "cancel": "إلغاء",
+      "errors": {
+        "nameEnRequired": "الاسم الإنجليزي مطلوب.",
+        "nameArRequired": "الاسم العربي مطلوب.",
+        "startsAtRequired": "تاريخ البداية مطلوب.",
+        "endsAtRequired": "تاريخ النهاية مطلوب.",
+        "dateRangeInvalid": "يجب أن يكون تاريخ النهاية بعد تاريخ البداية.",
+        "bundleNameEnRequired": "الاسم الإنجليزي للباقة مطلوب.",
+        "bundleNameArRequired": "الاسم العربي للباقة مطلوب.",
+        "discountValueInvalid": "أدخل قيمة خصم صحيحة.",
+        "minOrderInvalid": "أدخل حداً أدنى صحيحاً للطلب.",
+        "noItems": "أضف منتجاً واحداً على الأقل إلى الباقة.",
+        "quantityMin": "يجب أن تكون الكمية 1 على الأقل.",
+        "variantRequired": "اختر متغير المنتج.",
+        "notFound": "الحملة غير موجودة.",
+        "unknown": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
+      }
+    },
+    "preview": {
+      "title": "معاينة الباقة",
+      "subtitle": "كيف ستظهر هذه الباقة كبطاقة ترويجية.",
+      "discount": "خصم {value}%",
+      "discountFixed": "خصم {value} ريال",
+      "items": "{count} منتجات",
+      "noBundle": "أضف باقة أعلاه لرؤية المعاينة."
+    },
+    "bundleDiscount": {
+      "available": "خصم الباقة متاح",
+      "saving": "وفّر {amount}",
+      "apply": "تطبيق",
+      "applied": "مطبّق",
+      "bundleName": "الباقة: {name}",
+      "remove": "إزالة"
+    }
   }
 }

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Gift, Award, Users, Crown } from "lucide-react";
+import { Gift, Award, Users, Crown, TrendingUp, TrendingDown } from "lucide-react";
 import type { Locale } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 import { requireModuleAccess } from "@/lib/auth/guard";
@@ -52,6 +52,18 @@ export default async function LoyaltyPage({
       value: formatNumber(summary.activeMembers, locale),
       tone: "bg-success/12 text-success",
     },
+    {
+      icon: TrendingUp,
+      label: t("kpi.awardedThisMonth"),
+      value: formatNumber(summary.pointsAwardedThisMonth, locale),
+      tone: "bg-success/12 text-success",
+    },
+    {
+      icon: TrendingDown,
+      label: t("kpi.redeemedThisMonth"),
+      value: formatNumber(summary.pointsRedeemedThisMonth, locale),
+      tone: "bg-warning/12 text-warning-foreground",
+    },
   ];
 
   const buckets: { key: keyof typeof summary.distribution; label: string }[] = [
@@ -68,14 +80,19 @@ export default async function LoyaltyPage({
       <CatalogHeader title={t("title")} subtitle={t("subtitle")} icon={Gift} />
 
       {/* Summary KPIs */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 xl:grid-cols-5">
         {kpis.map((k) => (
-          <div key={k.label} className="bg-card shadow-soft border-border rounded-2xl border p-5">
+          <div
+            key={k.label}
+            className="bg-card shadow-soft border-border rounded-2xl border p-5"
+          >
             <div className="mb-3 flex items-center justify-between">
               <span className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
                 {k.label}
               </span>
-              <span className={`flex size-9 items-center justify-center rounded-xl ${k.tone}`}>
+              <span
+                className={`flex size-9 items-center justify-center rounded-xl ${k.tone}`}
+              >
                 <k.icon className="size-4" />
               </span>
             </div>
@@ -102,16 +119,29 @@ export default async function LoyaltyPage({
                 <table className="w-full min-w-150 border-collapse text-sm">
                   <thead>
                     <tr className="border-border text-muted-foreground border-b text-xs font-semibold tracking-wider uppercase">
-                      <th className="px-5 py-3 text-start font-semibold">{t("leaderboard.rank")}</th>
-                      <th className="px-5 py-3 text-start font-semibold">{t("leaderboard.member")}</th>
-                      <th className="px-5 py-3 text-start font-semibold">{t("leaderboard.type")}</th>
-                      <th className="px-5 py-3 text-start font-semibold">{t("leaderboard.city")}</th>
-                      <th className="px-5 py-3 text-end font-semibold">{t("leaderboard.points")}</th>
+                      <th className="px-5 py-3 text-start font-semibold">
+                        {t("leaderboard.rank")}
+                      </th>
+                      <th className="px-5 py-3 text-start font-semibold">
+                        {t("leaderboard.member")}
+                      </th>
+                      <th className="px-5 py-3 text-start font-semibold">
+                        {t("leaderboard.type")}
+                      </th>
+                      <th className="px-5 py-3 text-start font-semibold">
+                        {t("leaderboard.city")}
+                      </th>
+                      <th className="px-5 py-3 text-end font-semibold">
+                        {t("leaderboard.points")}
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {summary.topMembers.map((m, i) => (
-                      <tr key={m.id} className="border-border border-b last:border-0">
+                      <tr
+                        key={m.id}
+                        className="border-border border-b last:border-0"
+                      >
                         <td className="px-5 py-3">
                           <span className="text-muted-foreground inline-flex items-center gap-1.5 tabular-nums">
                             {i < 3 ? (
@@ -160,8 +190,10 @@ export default async function LoyaltyPage({
         </div>
 
         {/* Distribution */}
-        <section className="bg-card shadow-soft border-border rounded-2xl border p-5">
-          <h2 className="text-foreground mb-4 text-sm font-semibold">{t("distribution.title")}</h2>
+        <section className="bg-card shadow-soft border-border h-fit rounded-2xl border p-5">
+          <h2 className="text-foreground mb-4 text-sm font-semibold">
+            {t("distribution.title")}
+          </h2>
           <ul className="flex flex-col gap-3">
             {buckets.map((b) => {
               const count = summary.distribution[b.key];
@@ -175,13 +207,18 @@ export default async function LoyaltyPage({
                     </span>
                   </div>
                   <div className="bg-muted h-2 overflow-hidden rounded-full">
-                    <div className="bg-primary h-full rounded-full" style={{ width: `${pct}%` }} />
+                    <div
+                      className="bg-primary h-full rounded-full"
+                      style={{ width: `${pct}%` }}
+                    />
                   </div>
                 </li>
               );
             })}
           </ul>
-          <p className="text-muted-foreground mt-4 text-xs leading-relaxed">{t("distribution.hint")}</p>
+          <p className="text-muted-foreground mt-4 text-xs leading-relaxed">
+            {t("distribution.hint")}
+          </p>
         </section>
       </div>
     </div>

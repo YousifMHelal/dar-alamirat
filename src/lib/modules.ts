@@ -21,6 +21,8 @@ import {
   UserCog,
   MapPin,
   Star,
+  Sparkles,
+  Megaphone,
   type LucideIcon,
 } from "lucide-react";
 
@@ -48,8 +50,11 @@ export const modules = [
   { key: "content", href: "/content", icon: LayoutPanelLeft },
   { key: "seo", href: "/seo", icon: Search },
   { key: "coupons", href: "/coupons", icon: Tag },
+  { key: "campaigns", href: "/campaigns", icon: Megaphone },
   { key: "loyalty", href: "/loyalty", icon: Gift },
   { key: "giftCards", href: "/gift-cards", icon: TicketCheck },
+  // Tools
+  { key: "shadeFinder", href: "/shade-finder", icon: Sparkles },
   // Finance
   { key: "financials", href: "/financials", icon: Receipt },
   { key: "reports", href: "/reports", icon: BarChart3 },
@@ -79,7 +84,11 @@ export const navSections = [
   },
   {
     key: "marketing",
-    modules: ["content", "seo", "coupons", "loyalty", "giftCards"],
+    modules: ["content", "seo", "coupons", "campaigns", "loyalty", "giftCards"],
+  },
+  {
+    key: "tools",
+    modules: ["shadeFinder"],
   },
   {
     key: "customers",
@@ -106,6 +115,7 @@ export type ModuleKey =
   | "content"
   | "seo"
   | "coupons"
+  | "campaigns"
   | "loyalty"
   | "giftCards"
   | "financials"
@@ -117,7 +127,8 @@ export type ModuleKey =
   | "reviews"
   | "notifications"
   | "support"
-  | "settings";
+  | "settings"
+  | "shadeFinder";
 
 export function getModule(key: ModuleKey): PortalModule | undefined {
   return modules.find((m) => m.key === key);

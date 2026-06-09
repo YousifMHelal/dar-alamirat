@@ -112,6 +112,11 @@ enum CouponType {
   FIXED_AMOUNT
 }
 
+enum BundleDiscountType {
+  PERCENTAGE
+  FIXED
+}
+
 enum CouponStatus {
   ACTIVE
   SCHEDULED
@@ -213,6 +218,7 @@ model Customer {
   longitude     Float
   crmNotes      String? // the "merchant notebook" — free text
   loyaltyPoints Int          @default(0)
+  vatNumber     String? // Saudi VAT registration number (B2B invoices)
 
   // B2B_SALON customers link to one credit account and one pricing tier.
   creditAccount CreditAccount?
@@ -323,6 +329,7 @@ model ProductVariant {
   tierPrices     TierPrice[]
   orderItems     OrderItem[]
   stockTransfers StockTransfer[]
+  bundleItems    BundleItem[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -500,6 +507,9 @@ model Order {
   vatAmount Decimal @db.Decimal(10, 2)
   total     Decimal @db.Decimal(10, 2)
 
+  pointsRedeemed  Int     @default(0)
+  pointsDiscount  Decimal @default(0) @db.Decimal(10, 2)
+
   // Filled by Phase 3 routing; nullable until then.
   assignedWarehouseId String?
   assignedWarehouse   Warehouse? @relation(fields: [assignedWarehouseId], references: [id])
@@ -535,6 +545,8 @@ model OrderItem {
   unitPrice Decimal @db.Decimal(10, 2) // price actually charged (retail or wholesale)
   lineTotal Decimal @db.Decimal(10, 2)
 
+  shipmentItems ShipmentItem[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -557,11 +569,25 @@ model Shipment {
   status          ShipmentStatus @default(PENDING)
   trackingUpdates Json?
 
+  items ShipmentItem[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([orderId])
   @@index([warehouseId])
+}
+
+model ShipmentItem {
+  id          String    @id @default(cuid())
+  shipmentId  String
+  shipment    Shipment  @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  orderItemId String
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  quantity    Int
+
+  @@index([shipmentId])
+  @@index([orderItemId])
 }
 
 model Payment {
@@ -825,4 +851,58 @@ model Setting {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// ─────────────────────────────────────────────────────────────
+// Campaigns & bundles
+// ─────────────────────────────────────────────────────────────
+
+model Campaign {
+  id        String   @id @default(cuid())
+  nameAr    String
+  nameEn    String
+  occasion  String?
+  startsAt  DateTime
+  endsAt    DateTime
+  isActive  Boolean  @default(true)
+
+  bundles Bundle[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+}
+
+model Bundle {
+  id           String             @id @default(cuid())
+  campaignId   String
+  campaign     Campaign           @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  nameAr       String
+  nameEn       String
+  discountType BundleDiscountType
+  discountValue Decimal           @db.Decimal(10, 2)
+  minOrderAmount Decimal?         @db.Decimal(10, 2)
+
+  items BundleItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([campaignId])
+}
+
+model BundleItem {
+  id               String         @id @default(cuid())
+  bundleId         String
+  bundle           Bundle         @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  productVariantId String
+  productVariant   ProductVariant @relation(fields: [productVariantId], references: [id])
+  quantity         Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([bundleId])
+  @@index([productVariantId])
 }

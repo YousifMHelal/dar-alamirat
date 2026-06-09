@@ -50,6 +50,7 @@ export interface CustomerProfile {
   loyaltyPoints: number;
   pricingTierId: string | null;
   pricingTierName: string | null;
+  vatNumber: string | null;
 }
 
 export type LookupResult =
@@ -99,6 +100,7 @@ export async function lookupCustomerByPhone(phone: string): Promise<LookupResult
       loyaltyPoints: customer.loyaltyPoints,
       pricingTierId: customer.pricingTierId,
       pricingTierName: customer.pricingTier?.name ?? null,
+      vatNumber: customer.vatNumber ?? null,
     },
   };
 }
@@ -133,8 +135,9 @@ export async function createCustomer(
       addressLine: data.addressLine,
       latitude: data.latitude,
       longitude: data.longitude,
-      // Only B2B salons carry a pricing tier.
+      // Only B2B salons carry a pricing tier and VAT number.
       pricingTierId: data.type === "B2B_SALON" ? (data.pricingTierId ?? null) : null,
+      vatNumber: data.type === "B2B_SALON" ? (data.vatNumber ?? null) : null,
     },
     include: { pricingTier: { select: { name: true } } },
   });
@@ -155,6 +158,7 @@ export async function createCustomer(
       loyaltyPoints: customer.loyaltyPoints,
       pricingTierId: customer.pricingTierId,
       pricingTierName: customer.pricingTier?.name ?? null,
+      vatNumber: customer.vatNumber ?? null,
     },
   };
 }
@@ -293,6 +297,8 @@ export type CreateOrderResult =
       assignedWarehouse: { name: string; code: string; city: string; distanceKm: number };
       split: boolean;
       shipments: ShipmentSummary[];
+      pointsRedeemed: number;
+      pointsDiscount: string;
     }
   | { ok: false; error: string; moqViolations?: Array<{ variantId: string; quantity: number; moq: number }> };
 
@@ -312,15 +318,45 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "invalid" };
   }
-  const { customerId, lines, paymentMethod } = parsed.data;
+  const { customerId, lines, paymentMethod, redeemPoints } = parsed.data;
 
   // ── Load the customer (mode + coords for routing). ──────────────────
   const customer = await prisma.customer.findUnique({
     where: { id: customerId },
-    select: { id: true, type: true, latitude: true, longitude: true, pricingTierId: true },
+    select: { id: true, type: true, latitude: true, longitude: true, pricingTierId: true, loyaltyPoints: true },
   });
   if (!customer) return { ok: false, error: "customerNotFound" };
   const mode = pricingModeForCustomer(customer.type);
+
+  // ── B2B credit limit pre-check (before expensive routing). ──────────
+  // We need the order total to compare against the limit. Compute a quick
+  // subtotal here; the full VAT / points / routing logic runs later inside
+  // the transaction only if the credit gate passes.
+  if (paymentMethod === "B2B_CREDIT") {
+    const creditAccount = await prisma.creditAccount.findUnique({
+      where: { customerId },
+      select: { creditLimit: true, balance: true },
+    });
+    if (creditAccount) {
+      // Estimate pre-VAT subtotal from raw input prices to keep this cheap.
+      const variantIdsForCheck = lines.map((l) => l.variantId);
+      const variantsForCheck = await prisma.productVariant.findMany({
+        where: { id: { in: variantIdsForCheck } },
+        select: { id: true, productId: true, priceOverride: true, product: { select: { basePrice: true } } },
+      });
+      const variantMapForCheck = new Map(variantsForCheck.map((v) => [v.id, v]));
+      const estimatedSubtotal = lines.reduce((sum, l) => {
+        const v = variantMapForCheck.get(l.variantId);
+        const price = v ? Number(v.priceOverride ?? v.product.basePrice) : 0;
+        return sum + price * l.quantity;
+      }, 0);
+      const estimatedTotal = new Prisma.Decimal((estimatedSubtotal * 1.15).toFixed(2));
+      const projectedBalance = creditAccount.balance.add(estimatedTotal);
+      if (projectedBalance.greaterThan(creditAccount.creditLimit)) {
+        return { ok: false, error: "credit_limit_exceeded" };
+      }
+    }
+  }
 
   // ── Load variants + their base/override prices. ─────────────────────
   const variantIds = lines.map((l) => l.variantId);
@@ -377,7 +413,17 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
 
   // ── VAT math (15%). ─────────────────────────────────────────────────
   const subtotal = sumLineTotals(resolvedLines.map((l) => l.lineTotal));
-  const { vatAmount, total } = computeVat(subtotal);
+  const { vatAmount, total: totalBeforePoints } = computeVat(subtotal);
+
+  // ── Loyalty redemption (100 pts = 10 SAR, applied after VAT). ───────
+  // Only allow redemption if the customer actually has ≥ 100 points.
+  const canRedeem = redeemPoints && customer.loyaltyPoints >= 100;
+  // Points used = all available points rounded down to the nearest 100-block.
+  const pointsRedeemed = canRedeem ? Math.floor(customer.loyaltyPoints / 100) * 100 : 0;
+  // Discount = 10 SAR per 100 points, capped at the post-VAT total so total >= 0.
+  const pointsDiscountRaw = (pointsRedeemed / 100) * 10;
+  const pointsDiscount = new Prisma.Decimal(Math.min(pointsDiscountRaw, Number(totalBeforePoints)).toFixed(2));
+  const total = new Prisma.Decimal((Number(totalBeforePoints) - Number(pointsDiscount)).toFixed(2));
 
   // ── AC#3: geo-route to nearest in-stock warehouse (+ split). ────────
   const warehouses = await prisma.warehouse.findMany({
@@ -418,6 +464,8 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
         subtotal,
         vatAmount,
         total,
+        pointsRedeemed,
+        pointsDiscount,
         assignedWarehouseId: routing.assignedWarehouse.id,
         items: {
           createMany: {
@@ -443,25 +491,56 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
           })),
         },
       },
-      select: { id: true, orderNumber: true },
+      select: {
+        id: true,
+        orderNumber: true,
+        shipments: { select: { id: true, warehouseId: true } },
+        items: { select: { id: true, variantId: true } },
+      },
     });
 
-    // Decrement inventory at the fulfilling warehouse for each shipped line.
-    for (const shipment of routing.shipments) {
-      for (const line of shipment.lines) {
-        await tx.inventoryItem.update({
-          where: {
-            warehouseId_variantId: {
-              warehouseId: shipment.warehouse.id,
-              variantId: line.variantId,
-            },
-          },
-          data: { quantityOnHand: { decrement: line.quantity } },
-        });
+    // Link each OrderItem to its Shipment via ShipmentItem — one batch per shipment.
+    for (const routedShipment of routing.shipments) {
+      const createdShipment = order.shipments.find(
+        (s) => s.warehouseId === routedShipment.warehouse.id,
+      );
+      if (!createdShipment) continue;
+      const shipmentItemData = routedShipment.lines.flatMap((line) => {
+        const orderItem = order.items.find((i) => i.variantId === line.variantId);
+        if (!orderItem) return [];
+        return [{ shipmentId: createdShipment.id, orderItemId: orderItem.id, quantity: line.quantity }];
+      });
+      if (shipmentItemData.length) {
+        await tx.shipmentItem.createMany({ data: shipmentItemData });
       }
     }
 
-    return order;
+    // Decrement inventory — fire all updates in parallel to avoid serial round-trips.
+    await Promise.all(
+      routing.shipments.flatMap((shipment) =>
+        shipment.lines.map((line) =>
+          tx.inventoryItem.update({
+            where: {
+              warehouseId_variantId: {
+                warehouseId: shipment.warehouse.id,
+                variantId: line.variantId,
+              },
+            },
+            data: { quantityOnHand: { decrement: line.quantity } },
+          }),
+        ),
+      ),
+    );
+
+    // Atomically deduct redeemed loyalty points from the customer.
+    if (pointsRedeemed > 0) {
+      await tx.customer.update({
+        where: { id: customer.id },
+        data: { loyaltyPoints: { decrement: pointsRedeemed } },
+      });
+    }
+
+    return { id: order.id, orderNumber: order.orderNumber };
   });
 
   revalidatePath("/orders");
@@ -484,6 +563,8 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
       distanceKm: Math.round(s.distanceKm),
       variantCount: s.lines.length,
     })),
+    pointsRedeemed,
+    pointsDiscount: pointsDiscount.toFixed(2),
   };
 }
 

@@ -4,8 +4,9 @@ import { Plus, PackageOpen, MapPin, Split } from "lucide-react";
 import type { Locale } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 import { requireModuleAccess } from "@/lib/auth/guard";
-import { listOrders } from "@/lib/orders/queries";
+import { listOrders, getIssuedInvoiceOrderNumbers } from "@/lib/orders/queries";
 import { formatSar } from "@/lib/money";
+import { Badge } from "@/components/ui/badge";
 import { OrderStatus, OrderType } from "@/generated/prisma/enums";
 import { OrdersHeader } from "@/components/orders/page-header";
 import { OrdersToolbar } from "@/components/orders/orders-toolbar";
@@ -49,6 +50,7 @@ export default async function OrdersPage({
   const page = Number(sp.page) || 1;
 
   const { rows, total, pageCount } = await listOrders({ search, status, type, page });
+  const issuedInvoices = await getIssuedInvoiceOrderNumbers(rows.map((r) => r.orderNumber));
 
   const dateFmt = new Intl.DateTimeFormat(locale === "ar" ? "ar-SA" : "en-GB", {
     day: "2-digit",
@@ -103,6 +105,7 @@ export default async function OrdersPage({
                   <th className="px-4 py-3 text-end font-semibold">{t("table.total")}</th>
                   <th className="px-4 py-3 text-start font-semibold">{t("table.warehouse")}</th>
                   <th className="px-4 py-3 text-end font-semibold">{t("table.placedAt")}</th>
+                  <th className="px-4 py-3 text-start font-semibold">{t("table.compliance")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -133,6 +136,10 @@ export default async function OrdersPage({
                       <span className="text-foreground font-medium tabular-nums">
                         {formatSar(order.total, locale)}
                       </span>
+                      <div className="text-muted-foreground mt-0.5 flex flex-col gap-0 text-xs tabular-nums">
+                        <span>{t("detail.subtotal")}: {formatSar(Number(order.total) - Number(order.vatAmount), locale)}</span>
+                        <span>{t("detail.vat")}: {formatSar(order.vatAmount, locale)}</span>
+                      </div>
                     </td>
                     <td className="px-4 py-3">
                       {order.assignedWarehouse ? (
@@ -152,6 +159,13 @@ export default async function OrdersPage({
                     </td>
                     <td className="text-muted-foreground px-4 py-3 text-end tabular-nums">
                       {dateFmt.format(order.placedAt)}
+                    </td>
+                    <td className="px-4 py-3">
+                      {issuedInvoices.has(order.orderNumber) ? (
+                        <Badge tone="success">{t("table.invoiceIssued")}</Badge>
+                      ) : (
+                        <Badge tone="neutral">{t("table.invoiceNotIssued")}</Badge>
+                      )}
                     </td>
                   </tr>
                 ))}

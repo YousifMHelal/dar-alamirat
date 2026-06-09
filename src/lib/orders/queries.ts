@@ -122,7 +122,27 @@ export async function getOrderDetail(id: string) {
           carrier: true,
           waybillNumber: true,
           status: true,
-          warehouse: { select: { name: true, code: true, city: true } },
+          warehouse: { select: { id: true, name: true, code: true, city: true } },
+          items: {
+            select: {
+              id: true,
+              quantity: true,
+              orderItem: {
+                select: {
+                  id: true,
+                  variantId: true,
+                  variant: {
+                    select: {
+                      variantSku: true,
+                      colorName: true,
+                      colorHex: true,
+                      product: { select: { nameEn: true, nameAr: true, brand: true } },
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       },
       payments: {
@@ -143,3 +163,43 @@ export type OrderDetail = NonNullable<Awaited<ReturnType<typeof getOrderDetail>>
 
 /** Distinct status/type values for filter dropdowns are enum-driven, so no
  * query is needed — kept here as a reminder that filters come from enums. */
+
+/**
+ * Load the cached ZATCA result for a single order from the Settings table.
+ * Returns null if no invoice has been generated yet.
+ */
+export async function getOrderZatcaStatus(orderNumber: string) {
+  const row = await prisma.setting.findUnique({
+    where: { key: `zatca.qr.${orderNumber}` },
+    select: { valueJson: true, updatedAt: true },
+  });
+  if (!row) return null;
+  const v = row.valueJson as { qrCode?: string; xml?: string; submissionStatus?: string } | null;
+  return {
+    qrCode: v?.qrCode ?? null,
+    xml: v?.xml ?? null,
+    submissionStatus: v?.submissionStatus ?? null,
+    updatedAt: row.updatedAt,
+  };
+}
+
+export type OrderZatcaStatus = Awaited<ReturnType<typeof getOrderZatcaStatus>>;
+
+/**
+ * For the orders list: fetch just the setting keys that exist so we can mark
+ * which orders have had an e-invoice issued.  Returns a Set of orderNumbers.
+ */
+export async function getIssuedInvoiceOrderNumbers(orderNumbers: string[]): Promise<Set<string>> {
+  if (orderNumbers.length === 0) return new Set();
+  const keys = orderNumbers.map((n) => `zatca.qr.${n}`);
+  const rows = await prisma.setting.findMany({
+    where: { key: { in: keys } },
+    select: { key: true, valueJson: true },
+  });
+  const result = new Set<string>();
+  for (const row of rows) {
+    const orderNumber = row.key.replace("zatca.qr.", "");
+    result.add(orderNumber);
+  }
+  return result;
+}

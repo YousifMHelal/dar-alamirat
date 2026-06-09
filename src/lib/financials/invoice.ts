@@ -32,6 +32,7 @@ export async function generateInvoiceForOrder(orderId: string): Promise<Generate
         select: {
           name: true,
           type: true,
+          vatNumber: true,
         },
       },
       items: {
@@ -55,6 +56,7 @@ export async function generateInvoiceForOrder(orderId: string): Promise<Generate
     invoiceNumber: order.orderNumber,
     issueDate: order.placedAt,
     buyerName: order.customer.name,
+    buyerVat: order.type === "WHOLESALE" ? (order.customer.vatNumber ?? undefined) : undefined,
     lines: order.items.map((item) => ({
       description: item.variant.product.nameEn,
       quantity: item.quantity,

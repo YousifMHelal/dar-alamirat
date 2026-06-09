@@ -9,20 +9,22 @@ import {
   Mail,
   StickyNote,
   Split,
-  Warehouse,
 } from "lucide-react";
 import type { Locale } from "@/i18n/routing";
 import { getDirection } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 import { requireModuleAccess } from "@/lib/auth/guard";
-import { getOrderDetail } from "@/lib/orders/queries";
+import { getOrderDetail, getOrderZatcaStatus } from "@/lib/orders/queries";
+import { prisma } from "@/lib/prisma";
 import { formatSar, formatNumber } from "@/lib/money";
+import { ZatcaOrderSection } from "@/components/orders/zatca-order-section";
+import { ShipmentCard } from "@/components/orders/shipment-card";
 import {
   OrderStatusBadge,
   OrderTypeBadge,
   PaymentStatusBadge,
-  ShipmentStatusBadge,
 } from "@/components/orders/status-badge";
+import type { ShipmentStatus, Carrier } from "@/generated/prisma/enums";
 
 const MODULE_KEY = "orders";
 
@@ -46,9 +48,13 @@ export default async function OrderDetailPage({
   setRequestLocale(locale);
   await requireModuleAccess(MODULE_KEY, locale);
 
-  const order = await getOrderDetail(id);
+  const [order, warehouses] = await Promise.all([
+    getOrderDetail(id),
+    prisma.warehouse.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
+  ]);
   if (!order) notFound();
 
+  const zatcaStatus = await getOrderZatcaStatus(order.orderNumber);
   const t = await getTranslations({ locale, namespace: "orders" });
   const isRtl = getDirection(locale) === "rtl";
   const BackIcon = isRtl ? ArrowRight : ArrowLeft;
@@ -63,6 +69,14 @@ export default async function OrderDetailPage({
     locale === "ar" ? p.nameAr : p.nameEn;
 
   const isSplit = order.shipments.length > 1;
+
+  const allStatuses: { value: ShipmentStatus; label: string }[] = (
+    ["PENDING", "IN_TRANSIT", "DELIVERED", "RETURNED"] as ShipmentStatus[]
+  ).map((v) => ({ value: v, label: t(`shipmentStatus.${v}`) }));
+
+  const allCarriers: { value: Carrier; label: string }[] = (
+    ["ARAMEX", "SMSA", "SPL"] as Carrier[]
+  ).map((v) => ({ value: v, label: v }));
 
   return (
     <div className="flex flex-col gap-6">
@@ -155,13 +169,14 @@ export default async function OrderDetailPage({
             {/* VAT breakdown */}
             <dl className="border-border bg-surface-muted/40 flex flex-col gap-2 border-t px-5 py-4 text-sm">
               <SummaryRow label={t("detail.subtotal")} value={formatSar(order.subtotal, locale)} />
-              <SummaryRow label={t("detail.vat")} value={formatSar(order.vatAmount, locale)} />
+              <SummaryRow label={t("detail.vat")} value={`+ ${formatSar(order.vatAmount, locale)}`} />
               <div className="border-border mt-1 flex items-center justify-between border-t pt-3">
                 <dt className="text-foreground text-base font-semibold">{t("detail.total")}</dt>
                 <dd className="text-foreground text-base font-semibold tabular-nums">
                   {formatSar(order.total, locale)}
                 </dd>
               </div>
+              <p className="text-muted-foreground text-end text-xs">{t("detail.vatInclusiveLabel")}</p>
             </dl>
           </section>
 
@@ -180,34 +195,32 @@ export default async function OrderDetailPage({
               <p className="text-muted-foreground text-sm">{t("detail.noShipments")}</p>
             ) : (
               <ul className="flex flex-col gap-3">
-                {order.shipments.map((s) => (
-                  <li
+                {order.shipments.map((s, idx) => (
+                  <ShipmentCard
                     key={s.id}
-                    className="border-border flex flex-wrap items-center justify-between gap-3 rounded-xl border px-4 py-3"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="bg-primary-soft text-primary flex size-9 items-center justify-center rounded-lg">
-                        <Warehouse className="size-4" />
-                      </span>
-                      <div>
-                        <div className="text-foreground text-sm font-medium">
-                          {s.warehouse
-                            ? t("detail.fromWarehouse", { warehouse: s.warehouse.name })
-                            : t("detail.shipments")}
-                        </div>
-                        <div className="text-muted-foreground text-xs">
-                          {s.carrier}
-                          {s.waybillNumber && (
-                            <>
-                              {" · "}
-                              {t("detail.waybill")} {s.waybillNumber}
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <ShipmentStatusBadge status={s.status} label={t(`shipmentStatus.${s.status}`)} />
-                  </li>
+                    index={idx}
+                    locale={locale}
+                    allStatuses={allStatuses}
+                    allCarriers={allCarriers}
+                    warehouses={warehouses}
+                    shipment={{
+                      id: s.id,
+                      carrier: s.carrier,
+                      waybillNumber: s.waybillNumber,
+                      status: s.status,
+                      warehouse: s.warehouse ?? null,
+                      items: s.items.map((si) => ({
+                        id: si.id,
+                        orderItemId: si.orderItem.id,
+                        quantity: si.quantity,
+                        sku: si.orderItem.variant.variantSku,
+                        productName: locale === "ar"
+                          ? si.orderItem.variant.product.nameAr
+                          : si.orderItem.variant.product.nameEn,
+                        colorName: si.orderItem.variant.colorName,
+                      })),
+                    }}
+                  />
                 ))}
               </ul>
             )}
@@ -315,6 +328,9 @@ export default async function OrderDetailPage({
               </ul>
             )}
           </section>
+
+          {/* ZATCA e-invoice */}
+          <ZatcaOrderSection orderId={order.id} initialStatus={zatcaStatus} />
         </div>
       </div>
     </div>

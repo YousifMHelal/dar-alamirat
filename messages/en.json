@@ -33,7 +33,10 @@
     "giftCards": "Gift Cards",
     "performance": "Performance",
     "notifications": "Notifications",
-    "support": "Support"
+    "support": "Support",
+    "campaigns": "Campaigns",
+    "shadeFinder": "Shade Finder",
+    "section_tools": "Tools"
   },
   "shell": {
     "collapseSidebar": "Collapse sidebar",
@@ -171,6 +174,14 @@
     "support": {
       "title": "Help Center & Support",
       "description": "Track and respond to customer support tickets in one place."
+    },
+    "campaigns": {
+      "title": "Campaigns & Bundles",
+      "description": "Build product bundle campaigns for Ramadan, National Day, Eid, and other occasions."
+    },
+    "shadeFinder": {
+      "title": "AI Shade Finder",
+      "description": "AI-powered quiz to match staff or customers to the right foundation and concealer shade."
     }
   },
   "orders": {
@@ -224,7 +235,10 @@
       "placedAt": "Placed",
       "items": "items",
       "unassigned": "Unassigned",
-      "split": "Split"
+      "split": "Split",
+      "compliance": "e-Invoice",
+      "invoiceIssued": "Issued",
+      "invoiceNotIssued": "Not issued"
     },
     "empty": {
       "title": "No orders found",
@@ -249,6 +263,7 @@
       "subtotal": "Subtotal",
       "vat": "VAT (15%)",
       "total": "Total",
+      "vatInclusiveLabel": "Price includes 15% VAT",
       "customer": "Customer",
       "crmNotes": "CRM notes",
       "noNotes": "No notes on file.",
@@ -262,7 +277,42 @@
       "assignedWarehouse": "Assigned warehouse",
       "fromWarehouse": "From {warehouse}",
       "waybill": "Waybill",
-      "splitNote": "This order is split across {count} warehouses."
+      "splitNote": "This order is split across {count} warehouses.",
+      "shipmentItems": "Shipment contents",
+      "changeCarrier": "Change carrier",
+      "changeStatus": "Update status",
+      "splitShipment": "Split shipment",
+      "shipmentUpdated": "Shipment updated",
+      "splitSuccess": "New shipment created",
+      "carrierChangeBlocked": "Cannot change carrier after waybill is created.",
+      "splitDialog": {
+        "title": "Split shipment",
+        "subtitle": "Select the items and quantities to move to a new shipment.",
+        "newCarrier": "Carrier for new shipment",
+        "newWarehouse": "Warehouse for new shipment (optional)",
+        "noWarehouse": "— No warehouse —",
+        "confirm": "Confirm split",
+        "splitting": "Splitting…"
+      },
+      "zatca": {
+        "title": "ZATCA e-Invoice",
+        "issue": "Issue e-Invoice",
+        "reissue": "Re-issue e-Invoice",
+        "issuing": "Issuing…",
+        "issued": "e-Invoice issued",
+        "qrLabel": "TLV QR code",
+        "qrHint": "Encoded per ZATCA QR spec v1.1",
+        "showXml": "View UBL XML",
+        "hideXml": "Hide XML",
+        "noCsidNote": "ZATCA_CERT and ZATCA_CSID are not configured — invoice artifact is ready but submission is skipped.",
+        "status": {
+          "REPORTED": "Reported",
+          "CLEARED": "Cleared",
+          "WARNING": "Warning",
+          "ERROR": "Error",
+          "LOCAL": "Local only"
+        }
+      }
     },
     "form": {
       "title": "New order",
@@ -289,6 +339,7 @@
       "email": "Email (optional)",
       "tier": "Pricing tier",
       "selectTier": "Select a tier",
+      "vatNumber": "VAT registration number",
       "save": "Save customer",
       "saving": "Saving…",
       "addItems": "Add items",
@@ -306,7 +357,11 @@
       "subtotal": "Subtotal",
       "vat": "VAT (15%)",
       "total": "Total",
+      "vatInclusiveNote": "Price includes 15% VAT",
       "paymentMethod": "Payment method",
+      "redeemPoints": "Redeem {points} loyalty points",
+      "redeemPointsHint": "Saves {discount} off your total",
+      "pointsDiscount": "{points} pts redeemed",
       "placeOrder": "Place order",
       "placing": "Placing order…",
       "selectCustomerFirst": "Select a customer to begin.",
@@ -330,6 +385,7 @@
         "outOfStock": "Some items are out of stock at every warehouse.",
         "customerNotFound": "Customer not found.",
         "variantNotFound": "One or more products could not be found.",
+        "credit_limit_exceeded": "This order would exceed the customer's credit limit.",
         "unknown": "Something went wrong. Please try again."
       }
     }
@@ -1206,7 +1262,9 @@
     "kpi": {
       "totalPoints": "Total points outstanding",
       "totalMembers": "Total customers",
-      "activeMembers": "Members with points"
+      "activeMembers": "Members with points",
+      "awardedThisMonth": "Points awarded this month",
+      "redeemedThisMonth": "Points redeemed this month"
     },
     "type": {
       "RETAIL": "Retail",
@@ -1720,5 +1778,166 @@
       "empty": "No product sales in this range."
     },
     "rangeNote": "Showing data from {from} to {to}."
+  },
+  "shadeFinder": {
+    "title": "AI Shade Finder",
+    "subtitle": "Answer a few quick questions and Gemini will recommend the best foundation and concealer shades from our catalog.",
+    "step": "Step {current} of {total}",
+    "undertone": {
+      "question": "What is your skin undertone?",
+      "cool": "Cool",
+      "warm": "Warm",
+      "neutral": "Neutral",
+      "coolHint": "You look better in silver jewellery and pinkish hues",
+      "warmHint": "You look better in gold jewellery and earthy tones",
+      "neutralHint": "Both silver and gold look good on you"
+    },
+    "depth": {
+      "question": "What is your skin depth?",
+      "fair": "Fair",
+      "light": "Light",
+      "medium": "Medium",
+      "tan": "Tan",
+      "deep": "Deep"
+    },
+    "coverage": {
+      "question": "What coverage do you prefer?",
+      "light": "Light",
+      "medium": "Medium",
+      "full": "Full",
+      "lightHint": "Natural, skin-like finish",
+      "mediumHint": "Even skin tone with a hint of coverage",
+      "fullHint": "Maximum coverage for a flawless look"
+    },
+    "finish": {
+      "question": "What finish do you prefer?",
+      "matte": "Matte",
+      "satin": "Satin",
+      "dewy": "Dewy",
+      "matteHint": "Shine-free, velvety finish",
+      "satinHint": "Balanced, semi-luminous finish",
+      "dewyHint": "Fresh, glowing finish"
+    },
+    "back": "Back",
+    "next": "Next",
+    "findMyShade": "Find my shade",
+    "finding": "Finding shades…",
+    "results": {
+      "title": "Your recommended shades",
+      "subtitle": "Based on your answers, Gemini recommends these {count} products from our catalog.",
+      "reasoning": "Why this shade",
+      "addToOrder": "Add to new order",
+      "noResults": "No matching shades found in the catalog. Try adjusting your answers.",
+      "tryAgain": "Start over"
+    },
+    "errors": {
+      "unknown": "Something went wrong. Please try again."
+    }
+  },
+  "campaigns": {
+    "title": "Campaigns",
+    "subtitle": "Build product bundle campaigns for Saudi seasonal occasions with automatic discounts.",
+    "newCampaign": "New campaign",
+    "backToCampaigns": "Back to campaigns",
+    "status": {
+      "ACTIVE": "Active",
+      "SCHEDULED": "Scheduled",
+      "EXPIRED": "Expired"
+    },
+    "occasion": {
+      "label": "Occasion",
+      "placeholder": "e.g. Ramadan, National Day, Eid Al-Fitr",
+      "none": "No occasion"
+    },
+    "table": {
+      "name": "Campaign",
+      "occasion": "Occasion",
+      "dateRange": "Date range",
+      "bundles": "Bundles",
+      "status": "Status",
+      "bundleCount": "{count} bundles"
+    },
+    "empty": {
+      "title": "No campaigns yet",
+      "body": "Create your first campaign to bundle products with automatic discounts for seasonal occasions."
+    },
+    "pagination": {
+      "showing": "{count} of {total} campaigns",
+      "page": "Page {page} of {pageCount}",
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "form": {
+      "createTitle": "New campaign",
+      "editTitle": "Edit campaign",
+      "createSubtitle": "Set up a campaign with bundles and discounts.",
+      "editSubtitle": "Update campaign details and bundles.",
+      "sectionDetails": "Campaign details",
+      "sectionBundles": "Bundles",
+      "nameEn": "Name (English)",
+      "nameAr": "Name (Arabic)",
+      "startsAt": "Start date",
+      "endsAt": "End date",
+      "isActive": "Active",
+      "isActiveHint": "Inactive campaigns are excluded from order discount matching.",
+      "addBundle": "Add bundle",
+      "bundle": "Bundle {n}",
+      "bundleNameEn": "Bundle name (English)",
+      "bundleNameAr": "Bundle name (Arabic)",
+      "discountType": "Discount type",
+      "discountTypePercentage": "Percentage (%)",
+      "discountTypeFixed": "Fixed amount (SAR)",
+      "discountValue": "Discount value",
+      "minOrderAmount": "Min. order amount (SAR)",
+      "minOrderAmountHint": "Leave empty for no minimum.",
+      "bundleItems": "Products in bundle",
+      "addItem": "Add product",
+      "searchVariants": "Search products…",
+      "quantity": "Qty",
+      "removeItem": "Remove",
+      "removeBundle": "Remove bundle",
+      "noBundles": "No bundles yet. Add a bundle to define the discount.",
+      "save": "Save campaign",
+      "saving": "Saving…",
+      "saved": "Campaign saved.",
+      "create": "Create campaign",
+      "creating": "Creating…",
+      "delete": "Delete",
+      "deleting": "Deleting…",
+      "confirmDelete": "Delete this campaign and all its bundles? This cannot be undone.",
+      "cancel": "Cancel",
+      "errors": {
+        "nameEnRequired": "English name is required.",
+        "nameArRequired": "Arabic name is required.",
+        "startsAtRequired": "Start date is required.",
+        "endsAtRequired": "End date is required.",
+        "dateRangeInvalid": "End date must be after start date.",
+        "bundleNameEnRequired": "Bundle English name is required.",
+        "bundleNameArRequired": "Bundle Arabic name is required.",
+        "discountValueInvalid": "Enter a valid discount value.",
+        "minOrderInvalid": "Enter a valid minimum order amount.",
+        "noItems": "Add at least one product to the bundle.",
+        "quantityMin": "Quantity must be at least 1.",
+        "variantRequired": "Select a product variant.",
+        "notFound": "Campaign not found.",
+        "unknown": "Something went wrong. Please try again."
+      }
+    },
+    "preview": {
+      "title": "Bundle preview",
+      "subtitle": "How this bundle will appear as a promotional card.",
+      "discount": "{value}% off",
+      "discountFixed": "{value} SAR off",
+      "items": "{count} products",
+      "noBundle": "Add a bundle above to see a preview."
+    },
+    "bundleDiscount": {
+      "available": "Bundle discount available",
+      "saving": "Save {amount}",
+      "apply": "Apply",
+      "applied": "Applied",
+      "bundleName": "Bundle: {name}",
+      "remove": "Remove"
+    }
   }
 }

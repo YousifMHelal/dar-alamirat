@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import {
   Search,
@@ -15,6 +15,8 @@ import {
   Split,
   PackageCheck,
   Phone,
+  Tag,
+  Gift,
 } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -30,6 +32,7 @@ import {
   type VariantSearchItem,
   type CreateOrderResult,
 } from "@/lib/orders/actions";
+import { findMatchingBundles } from "@/lib/campaigns/bundle-check";
 
 /**
  * The hero order-entry form. Orchestrates all three acceptance criteria
@@ -66,6 +69,7 @@ const ERROR_KEYS = [
   "outOfStock",
   "customerNotFound",
   "variantNotFound",
+  "credit_limit_exceeded",
   "unknown",
 ] as const;
 
@@ -92,6 +96,7 @@ export function NewOrderForm({
   tiers: Array<{ id: string; name: string }>;
 }) {
   const t = useTranslations("orders");
+  const tCampaigns = useTranslations("campaigns");
   const router = useRouter();
 
   // ── Customer state ──────────────────────────────────────────────────
@@ -106,9 +111,14 @@ export function NewOrderForm({
   // ── Payment + submission ────────────────────────────────────────────
   const isWholesale = customer?.type === "B2B_SALON";
   const [paymentMethod, setPaymentMethod] = useState<(typeof PAYMENT_METHODS)[number]>("MADA");
+  const [redeemPoints, setRedeemPoints] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [result, setResult] = useState<Extract<CreateOrderResult, { ok: true }> | null>(null);
   const [isSubmitting, startSubmit] = useTransition();
+
+  // Reset redeem toggle when customer changes.
+  const customerLoyaltyPoints = customer?.loyaltyPoints ?? 0;
+  const canRedeemPoints = customerLoyaltyPoints >= 100;
 
   // ── AC#1: phone lookup ──────────────────────────────────────────────
   const onLookup = async () => {
@@ -134,7 +144,14 @@ export function NewOrderForm({
     setShowCreate(false);
     setResult(null);
     setSubmitError(null);
+    setRedeemPoints(false);
   };
+
+  // ── Bundle discount suggestion state ────────────────────────────────
+  type BundleMatch = Awaited<ReturnType<typeof findMatchingBundles>>[number];
+  const [bundleMatches, setBundleMatches] = useState<BundleMatch[]>([]);
+  const [appliedBundleId, setAppliedBundleId] = useState<string | null>(null);
+  const [discountAmount, setDiscountAmount] = useState(0);
 
   // ── Totals preview (mirrors lib/money on the server) ────────────────
   const totals = useMemo(() => {
@@ -146,10 +163,55 @@ export function NewOrderForm({
     return { subtotal, vatAmount, total: subtotal + vatAmount };
   }, [lines]);
 
+  const discountedTotals = useMemo(() => {
+    const discounted = Math.max(0, totals.subtotal - discountAmount);
+    const vatAmount = discounted * VAT_RATE_NUMBER;
+    const preTaxTotal = discounted + vatAmount;
+    // Points discount applied after VAT: 100 pts = 10 SAR, use all available in 100-blocks.
+    const pointsUsed = redeemPoints && canRedeemPoints
+      ? Math.floor(customerLoyaltyPoints / 100) * 100
+      : 0;
+    const pointsDiscountAmount = Math.min((pointsUsed / 100) * 10, preTaxTotal);
+    return {
+      subtotal: discounted,
+      vatAmount,
+      total: Math.max(0, preTaxTotal - pointsDiscountAmount),
+      pointsUsed,
+      pointsDiscountAmount,
+    };
+  }, [totals.subtotal, discountAmount, redeemPoints, canRedeemPoints, customerLoyaltyPoints]);
+
   const moqViolations = useMemo(
     () => lines.filter((l) => l.variant.mode === "WHOLESALE" && l.quantity < l.variant.moq),
     [lines],
   );
+
+  useEffect(() => {
+    const variantIds = lines.map((l) => l.variant.variantId);
+    if (variantIds.length === 0) {
+      setBundleMatches([]);
+      setAppliedBundleId(null);
+      setDiscountAmount(0);
+      return;
+    }
+    findMatchingBundles(variantIds).then(setBundleMatches);
+  }, [lines]);
+
+  function applyBundle(match: BundleMatch) {
+    const sub = totals.subtotal;
+    if (match.minOrderAmount && sub < Number(match.minOrderAmount)) return;
+    const amount =
+      match.discountType === "PERCENTAGE"
+        ? sub * (Number(match.discountValue) / 100)
+        : Math.min(Number(match.discountValue), sub);
+    setDiscountAmount(amount);
+    setAppliedBundleId(match.bundleId);
+  }
+
+  function removeBundle() {
+    setDiscountAmount(0);
+    setAppliedBundleId(null);
+  }
 
   const addLine = useCallback(
     (variant: VariantSearchItem) => {
@@ -188,6 +250,7 @@ export function NewOrderForm({
         customerId: customer.id,
         lines: lines.map((l) => ({ variantId: l.variant.variantId, quantity: l.quantity })),
         paymentMethod,
+        redeemPoints,
       });
       if (res.ok) {
         setResult(res);
@@ -349,21 +412,108 @@ export function NewOrderForm({
         <div className="bg-card shadow-soft border-border sticky top-24 flex flex-col gap-4 rounded-2xl border p-5">
           <h2 className="text-foreground text-sm font-semibold">{t("form.step3")}</h2>
 
+          {/* Bundle discount suggestion */}
+          {bundleMatches.length > 0 && (
+            <div className="flex flex-col gap-2">
+              {bundleMatches.map((match) => {
+                const isApplied = appliedBundleId === match.bundleId;
+                return (
+                  <div
+                    key={match.bundleId}
+                    className="bg-success/10 border-success/30 flex items-start justify-between gap-2 rounded-xl border p-3"
+                  >
+                    <div className="flex min-w-0 flex-col gap-0.5">
+                      <p className="text-success flex items-center gap-1 text-xs font-semibold">
+                        <Tag className="size-3.5" />
+                        {tCampaigns("bundleDiscount.available")}
+                      </p>
+                      <p className="text-muted-foreground truncate text-xs">
+                        {tCampaigns("bundleDiscount.bundleName", { name: match.bundleNameEn })}
+                      </p>
+                    </div>
+                    {isApplied ? (
+                      <button
+                        type="button"
+                        onClick={removeBundle}
+                        className="text-muted-foreground hover:text-foreground shrink-0 text-xs"
+                      >
+                        {tCampaigns("bundleDiscount.remove")}
+                      </button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => applyBundle(match)}
+                        className="shrink-0 text-xs"
+                      >
+                        {tCampaigns("bundleDiscount.apply")}
+                      </Button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Loyalty redeem toggle */}
+          {canRedeemPoints && (
+            <div className="border-border flex items-center justify-between gap-3 rounded-xl border px-3 py-2.5">
+              <div className="flex items-center gap-2">
+                <Gift className="text-primary size-4 shrink-0" />
+                <div>
+                  <p className="text-foreground text-xs font-medium">
+                    {t("form.redeemPoints", { points: formatNumber(customerLoyaltyPoints, locale) })}
+                  </p>
+                  <p className="text-muted-foreground text-xs">
+                    {t("form.redeemPointsHint", { discount: formatSar((Math.floor(customerLoyaltyPoints / 100) * 100 / 100) * 10, locale) })}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={redeemPoints}
+                onClick={() => setRedeemPoints((v) => !v)}
+                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${redeemPoints ? "bg-primary" : "bg-input"}`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${redeemPoints ? "translate-x-4 rtl:-translate-x-4" : "translate-x-0.5 rtl:-translate-x-0.5"}`}
+                />
+              </button>
+            </div>
+          )}
+
           <dl className="flex flex-col gap-2 text-sm">
             <div className="flex items-center justify-between">
               <dt className="text-muted-foreground">{t("form.subtotal")}</dt>
               <dd className="text-foreground tabular-nums">{formatSar(totals.subtotal, locale)}</dd>
             </div>
+            {discountAmount > 0 && (
+              <div className="flex items-center justify-between">
+                <dt className="text-success text-xs">{tCampaigns("bundleDiscount.saving", { amount: formatSar(discountAmount, locale) })}</dt>
+                <dd className="text-success tabular-nums">- {formatSar(discountAmount, locale)}</dd>
+              </div>
+            )}
             <div className="flex items-center justify-between">
               <dt className="text-muted-foreground">{t("form.vat")}</dt>
-              <dd className="text-foreground tabular-nums">{formatSar(totals.vatAmount, locale)}</dd>
+              <dd className="text-foreground tabular-nums">{formatSar(discountedTotals.vatAmount, locale)}</dd>
             </div>
+            {discountedTotals.pointsDiscountAmount > 0 && (
+              <div className="flex items-center justify-between">
+                <dt className="text-primary flex items-center gap-1 text-xs">
+                  <Gift className="size-3" />
+                  {t("form.pointsDiscount", { points: formatNumber(discountedTotals.pointsUsed, locale) })}
+                </dt>
+                <dd className="text-primary tabular-nums">- {formatSar(discountedTotals.pointsDiscountAmount, locale)}</dd>
+              </div>
+            )}
             <div className="border-border mt-1 flex items-center justify-between border-t pt-3">
               <dt className="text-foreground text-base font-semibold">{t("form.total")}</dt>
               <dd className="text-foreground text-base font-semibold tabular-nums">
-                {formatSar(totals.total, locale)}
+                {formatSar(discountedTotals.total, locale)}
               </dd>
             </div>
+            <p className="text-muted-foreground text-end text-xs">{t("form.vatInclusiveNote")}</p>
           </dl>
 
           <div>
@@ -643,6 +793,7 @@ function InlineCustomerCreate({
     latitude: "",
     longitude: "",
     pricingTierId: "",
+    vatNumber: "",
   });
   const [error, setError] = useState<string | null>(null);
   const [saving, startSave] = useTransition();
@@ -662,6 +813,7 @@ function InlineCustomerCreate({
         latitude: Number(form.latitude),
         longitude: Number(form.longitude),
         pricingTierId: form.type === "B2B_SALON" && form.pricingTierId ? form.pricingTierId : null,
+        vatNumber: form.type === "B2B_SALON" && form.vatNumber ? form.vatNumber : null,
       });
       if (res.ok) onCreated(res.customer);
       else setError(translateError(t, res.error));
@@ -710,6 +862,18 @@ function InlineCustomerCreate({
                 </option>
               ))}
             </select>
+          </div>
+        )}
+        {form.type === "B2B_SALON" && (
+          <div>
+            <Label htmlFor="c-vat">{t("form.vatNumber")}</Label>
+            <Input
+              id="c-vat"
+              value={form.vatNumber}
+              onChange={(e) => set("vatNumber", e.target.value)}
+              dir="ltr"
+              placeholder="300XXXXXXXXX1003"
+            />
           </div>
         )}
         <div>

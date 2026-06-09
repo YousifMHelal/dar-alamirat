@@ -26,6 +26,7 @@ export const newCustomerSchema = z.object({
   latitude: z.number().min(-90).max(90),
   longitude: z.number().min(-180).max(180),
   pricingTierId: z.string().cuid().optional().nullable(),
+  vatNumber: z.string().trim().max(50).optional().nullable(),
 });
 
 export const orderLineSchema = z.object({
@@ -37,6 +38,7 @@ export const createOrderSchema = z.object({
   customerId: z.string().cuid(),
   lines: z.array(orderLineSchema).min(1, "noLines"),
   paymentMethod: z.enum(["MADA", "TABBY", "TAMARA", "CREDIT_CARD", "B2B_CREDIT"]),
+  redeemPoints: z.boolean().optional().default(false),
 });
 
 export type NewCustomerInput = z.infer<typeof newCustomerSchema>;
