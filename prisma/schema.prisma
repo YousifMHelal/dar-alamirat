@@ -183,6 +183,20 @@ enum ImportExportJobStatus {
   FAILED
 }
 
+enum AffiliateChannel {
+  SNAPCHAT
+  INSTAGRAM
+  TIKTOK
+  YOUTUBE
+  OTHER
+}
+
+enum AffiliateStatus {
+  ACTIVE
+  PAUSED
+  ENDED
+}
+
 // ─────────────────────────────────────────────────────────────
 // Auth & people
 // ─────────────────────────────────────────────────────────────
@@ -507,8 +521,8 @@ model Order {
   vatAmount Decimal @db.Decimal(10, 2)
   total     Decimal @db.Decimal(10, 2)
 
-  pointsRedeemed  Int     @default(0)
-  pointsDiscount  Decimal @default(0) @db.Decimal(10, 2)
+  pointsRedeemed Int     @default(0)
+  pointsDiscount Decimal @default(0) @db.Decimal(10, 2)
 
   // Filled by Phase 3 routing; nullable until then.
   assignedWarehouseId String?
@@ -517,6 +531,9 @@ model Order {
   couponId String?
   coupon   Coupon? @relation(fields: [couponId], references: [id])
 
+  // Affiliate attribution: set when the order carries an affiliate code.
+  affiliateId String?
+
   placedAt DateTime @default(now())
 
   items     OrderItem[]
@@ -524,6 +541,7 @@ model Order {
   payments  Payment[]
 
   giftCardTransactions GiftCardTransaction[]
+  affiliateConversion  AffiliateConversion?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -531,6 +549,7 @@ model Order {
   @@index([customerId])
   @@index([assignedWarehouseId])
   @@index([couponId])
+  @@index([affiliateId])
   @@index([status])
 }
 
@@ -858,13 +877,13 @@ model Setting {
 // ─────────────────────────────────────────────────────────────
 
 model Campaign {
-  id        String   @id @default(cuid())
-  nameAr    String
-  nameEn    String
-  occasion  String?
-  startsAt  DateTime
-  endsAt    DateTime
-  isActive  Boolean  @default(true)
+  id       String   @id @default(cuid())
+  nameAr   String
+  nameEn   String
+  occasion String?
+  startsAt DateTime
+  endsAt   DateTime
+  isActive Boolean  @default(true)
 
   bundles Bundle[]
 
@@ -875,14 +894,14 @@ model Campaign {
 }
 
 model Bundle {
-  id           String             @id @default(cuid())
-  campaignId   String
-  campaign     Campaign           @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  nameAr       String
-  nameEn       String
-  discountType BundleDiscountType
-  discountValue Decimal           @db.Decimal(10, 2)
-  minOrderAmount Decimal?         @db.Decimal(10, 2)
+  id             String             @id @default(cuid())
+  campaignId     String
+  campaign       Campaign           @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  nameAr         String
+  nameEn         String
+  discountType   BundleDiscountType
+  discountValue  Decimal            @db.Decimal(10, 2)
+  minOrderAmount Decimal?           @db.Decimal(10, 2)
 
   items BundleItem[]
 
@@ -905,4 +924,57 @@ model BundleItem {
 
   @@index([bundleId])
   @@index([productVariantId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Affiliate / influencer marketing
+// ─────────────────────────────────────────────────────────────
+
+// A marketing influencer (e.g. a Snapchat creator) who promotes the store
+// with a unique tracking/discount code. Commission is earned on the
+// VAT-exclusive subtotal of attributed orders. Every order that carries this
+// affiliate's code spawns an AffiliateConversion snapshot, so payouts and
+// performance are auditable without re-deriving from live order data.
+model Affiliate {
+  id             String           @id @default(cuid())
+  name           String
+  handle         String // social handle, e.g. @noura.beauty
+  channel        AffiliateChannel @default(SNAPCHAT)
+  // Unique code shoppers enter at checkout (also a tracking link param).
+  code           String           @unique
+  email          String?
+  phone          String?
+  // Commission as a percentage of attributed net (ex-VAT) revenue, 0–100.
+  commissionRate Decimal          @db.Decimal(5, 2)
+  status         AffiliateStatus  @default(ACTIVE)
+  contractTerms  String? // free-text contract notes (rate cards, exclusivity, …)
+
+  conversions AffiliateConversion[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+}
+
+// One row per order attributed to an affiliate. Snapshots the order's net
+// revenue and the commission owed at attribution time, plus whether the
+// customer was new to the store — the document's "new customers driven" KPI.
+model AffiliateConversion {
+  id          String    @id @default(cuid())
+  affiliateId String
+  affiliate   Affiliate @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+
+  orderId String @unique // one conversion per order
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  // Net (ex-VAT) revenue attributed and commission owed, frozen at attribution.
+  netRevenue    Decimal @db.Decimal(10, 2)
+  commission    Decimal @db.Decimal(10, 2)
+  isNewCustomer Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([affiliateId])
 }

@@ -13,6 +13,12 @@ export default defineConfig({
     seed: "tsx prisma/seed.ts",
   },
   datasource: {
-    url: env("DATABASE_URL"),
+    // CLI-only connection (migrations, introspection, shadow-DB DDL). On Neon
+    // these must use the DIRECT (non-pooled) host — PgBouncer, the `-pooler`
+    // host in DATABASE_URL, can't serve DDL/shadow databases. Falls back to
+    // DATABASE_URL when DIRECT_URL is unset (e.g. local Docker Postgres).
+    // The runtime client reads DATABASE_URL itself (src/lib/prisma.ts) and is
+    // unaffected by this.
+    url: process.env.DIRECT_URL ?? env("DATABASE_URL"),
   },
 });

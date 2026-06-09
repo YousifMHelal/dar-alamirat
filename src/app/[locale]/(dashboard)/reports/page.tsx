@@ -111,13 +111,31 @@ export default async function ReportsPage({
       {/* KPI Summary Cards */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
         {[
-          { label: t("kpi.grossSales"), value: formatSar(kpis.grossSales, locale) },
+          {
+            label: t("kpi.grossSales"),
+            value: formatSar(kpis.grossSales, locale),
+          },
           { label: t("kpi.netSales"), value: formatSar(kpis.netSales, locale) },
-          { label: t("kpi.vatCollected"), value: formatSar(kpis.vatCollected, locale) },
-          { label: t("kpi.orders"), value: formatNumber(kpis.orderCount, locale) },
-          { label: t("kpi.avgOrder"), value: formatSar(kpis.avgOrderValue, locale) },
-          { label: t("kpi.b2bSales"), value: formatSar(kpis.b2b.sales, locale) },
-          { label: t("kpi.b2cSales"), value: formatSar(kpis.b2c.sales, locale) },
+          {
+            label: t("kpi.vatCollected"),
+            value: formatSar(kpis.vatCollected, locale),
+          },
+          {
+            label: t("kpi.orders"),
+            value: formatNumber(kpis.orderCount, locale),
+          },
+          {
+            label: t("kpi.avgOrder"),
+            value: formatSar(kpis.avgOrderValue, locale),
+          },
+          {
+            label: t("kpi.b2bSales"),
+            value: formatSar(kpis.b2b.sales, locale),
+          },
+          {
+            label: t("kpi.b2cSales"),
+            value: formatSar(kpis.b2c.sales, locale),
+          },
           {
             label: t("kpi.conversion"),
             value: formatPercent(kpis.conversionProxy, locale),
@@ -127,47 +145,82 @@ export default async function ReportsPage({
             key={label}
             className="bg-card border-border flex flex-col gap-1 rounded-xl border p-4"
           >
-            <span className="text-muted-foreground text-xs font-medium">{label}</span>
-            <span className="text-foreground text-lg font-semibold tabular-nums">{value}</span>
+            <span className="text-muted-foreground text-xs font-medium">
+              {label}
+            </span>
+            <span className="text-foreground text-lg font-semibold tabular-nums">
+              {value}
+            </span>
           </div>
         ))}
       </div>
 
       {/* Monthly Sales Table */}
       <section className="bg-card border-border rounded-xl border">
-        <div className="flex items-center justify-between border-b border-border px-5 py-4">
+        <div className="border-border flex items-center justify-between border-b px-5 py-4">
           <div>
-            <h2 className="text-foreground font-semibold">{t("monthly.title")}</h2>
-            <p className="text-muted-foreground text-sm">{t("monthly.subtitle")}</p>
+            <h2 className="text-foreground font-semibold">
+              {t("monthly.title")}
+            </h2>
+            <p className="text-muted-foreground text-sm">
+              {t("monthly.subtitle")}
+            </p>
           </div>
           <ExportButton
             filename={`monthly-sales-${filterFrom}-${filterTo}`}
-            headers={["Month", "Retail (SAR)", "Wholesale (SAR)", "Total (SAR)"]}
+            headers={[
+              "Month",
+              "Retail (SAR)",
+              "Wholesale (SAR)",
+              "Total (SAR)",
+            ]}
             rows={monthlyCsvRows}
           />
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border bg-muted/40">
-                <th className="px-5 py-3 text-start font-medium text-muted-foreground">{t("monthly.month")}</th>
-                <th className="px-5 py-3 text-end font-medium text-muted-foreground">{t("monthly.retail")}</th>
-                <th className="px-5 py-3 text-end font-medium text-muted-foreground">{t("monthly.wholesale")}</th>
-                <th className="px-5 py-3 text-end font-medium text-muted-foreground">{t("monthly.total")}</th>
+              <tr className="border-border bg-muted/40 border-b">
+                <th className="text-muted-foreground px-5 py-3 text-start font-medium">
+                  {t("monthly.month")}
+                </th>
+                <th className="text-muted-foreground px-5 py-3 text-end font-medium">
+                  {t("monthly.retail")}
+                </th>
+                <th className="text-muted-foreground px-5 py-3 text-end font-medium">
+                  {t("monthly.wholesale")}
+                </th>
+                <th className="text-muted-foreground px-5 py-3 text-end font-medium">
+                  {t("monthly.total")}
+                </th>
               </tr>
             </thead>
             <tbody>
               {salesOverTime.map((row) => (
-                <tr key={row.month} className="border-b border-border last:border-0 hover:bg-muted/30">
-                  <td className="px-5 py-3 text-foreground tabular-nums">{row.month}</td>
-                  <td className="px-5 py-3 text-end tabular-nums">{formatSar(row.retail, locale)}</td>
-                  <td className="px-5 py-3 text-end tabular-nums">{formatSar(row.wholesale, locale)}</td>
-                  <td className="px-5 py-3 text-end font-medium tabular-nums">{formatSar(row.total, locale)}</td>
+                <tr
+                  key={row.month}
+                  className="border-border hover:bg-muted/30 border-b last:border-0"
+                >
+                  <td className="text-foreground px-5 py-3 tabular-nums">
+                    {row.month}
+                  </td>
+                  <td className="px-5 py-3 text-end tabular-nums">
+                    {formatSar(row.retail, locale)}
+                  </td>
+                  <td className="px-5 py-3 text-end tabular-nums">
+                    {formatSar(row.wholesale, locale)}
+                  </td>
+                  <td className="px-5 py-3 text-end font-medium tabular-nums">
+                    {formatSar(row.total, locale)}
+                  </td>
                 </tr>
               ))}
               {salesOverTime.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-5 py-8 text-center text-muted-foreground">
+                  <td
+                    colSpan={4}
+                    className="text-muted-foreground px-5 py-8 text-center"
+                  >
                     {t("empty")}
                   </td>
                 </tr>
@@ -180,11 +233,15 @@ export default async function ReportsPage({
       {/* Two-column: Category + Top Products */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Sales by Category */}
-        <section className="bg-card border-border rounded-xl border">
-          <div className="flex items-center justify-between border-b border-border px-5 py-4">
+        <section className="bg-card border-border h-fit rounded-xl border">
+          <div className="border-border flex items-center justify-between border-b px-5 py-4">
             <div>
-              <h2 className="text-foreground font-semibold">{t("categories.title")}</h2>
-              <p className="text-muted-foreground text-sm">{t("categories.subtitle")}</p>
+              <h2 className="text-foreground font-semibold">
+                {t("categories.title")}
+              </h2>
+              <p className="text-muted-foreground text-sm">
+                {t("categories.subtitle")}
+              </p>
             </div>
             <ExportButton
               filename={`category-sales-${filterFrom}-${filterTo}`}
@@ -195,23 +252,41 @@ export default async function ReportsPage({
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/40">
-                  <th className="px-5 py-3 text-start font-medium text-muted-foreground">{t("categories.category")}</th>
-                  <th className="px-5 py-3 text-end font-medium text-muted-foreground">{t("categories.sales")}</th>
-                  <th className="px-5 py-3 text-end font-medium text-muted-foreground">{t("categories.units")}</th>
+                <tr className="border-border bg-muted/40 border-b">
+                  <th className="text-muted-foreground px-5 py-3 text-start font-medium">
+                    {t("categories.category")}
+                  </th>
+                  <th className="text-muted-foreground px-5 py-3 text-end font-medium">
+                    {t("categories.sales")}
+                  </th>
+                  <th className="text-muted-foreground px-5 py-3 text-end font-medium">
+                    {t("categories.units")}
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {salesByCategory.map((cat) => (
-                  <tr key={cat.categoryId} className="border-b border-border last:border-0 hover:bg-muted/30">
-                    <td className="px-5 py-3 text-foreground">{isAr ? cat.nameAr : cat.nameEn}</td>
-                    <td className="px-5 py-3 text-end tabular-nums">{formatSar(cat.sales, locale)}</td>
-                    <td className="px-5 py-3 text-end tabular-nums">{formatNumber(cat.units, locale)}</td>
+                  <tr
+                    key={cat.categoryId}
+                    className="border-border hover:bg-muted/30 border-b last:border-0"
+                  >
+                    <td className="text-foreground px-5 py-3">
+                      {isAr ? cat.nameAr : cat.nameEn}
+                    </td>
+                    <td className="px-5 py-3 text-end tabular-nums">
+                      {formatSar(cat.sales, locale)}
+                    </td>
+                    <td className="px-5 py-3 text-end tabular-nums">
+                      {formatNumber(cat.units, locale)}
+                    </td>
                   </tr>
                 ))}
                 {salesByCategory.length === 0 && (
                   <tr>
-                    <td colSpan={3} className="px-5 py-8 text-center text-muted-foreground">
+                    <td
+                      colSpan={3}
+                      className="text-muted-foreground px-5 py-8 text-center"
+                    >
                       {t("empty")}
                     </td>
                   </tr>
@@ -223,10 +298,14 @@ export default async function ReportsPage({
 
         {/* Top Products */}
         <section className="bg-card border-border rounded-xl border">
-          <div className="flex items-center justify-between border-b border-border px-5 py-4">
+          <div className="border-border flex items-center justify-between border-b px-5 py-4">
             <div>
-              <h2 className="text-foreground font-semibold">{t("products.title")}</h2>
-              <p className="text-muted-foreground text-sm">{t("products.subtitle")}</p>
+              <h2 className="text-foreground font-semibold">
+                {t("products.title")}
+              </h2>
+              <p className="text-muted-foreground text-sm">
+                {t("products.subtitle")}
+              </p>
             </div>
             <ExportButton
               filename={`top-products-${filterFrom}-${filterTo}`}
@@ -237,30 +316,54 @@ export default async function ReportsPage({
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/40">
-                  <th className="px-5 py-3 text-start font-medium text-muted-foreground">{t("products.product")}</th>
-                  <th className="px-5 py-3 text-start font-medium text-muted-foreground">{t("products.brand")}</th>
-                  <th className="px-5 py-3 text-end font-medium text-muted-foreground">{t("products.sales")}</th>
-                  <th className="px-5 py-3 text-end font-medium text-muted-foreground">{t("products.units")}</th>
+                <tr className="border-border bg-muted/40 border-b">
+                  <th className="text-muted-foreground px-5 py-3 text-start font-medium">
+                    {t("products.product")}
+                  </th>
+                  <th className="text-muted-foreground px-5 py-3 text-start font-medium">
+                    {t("products.brand")}
+                  </th>
+                  <th className="text-muted-foreground px-5 py-3 text-end font-medium">
+                    {t("products.sales")}
+                  </th>
+                  <th className="text-muted-foreground px-5 py-3 text-end font-medium">
+                    {t("products.units")}
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {topProducts.map((p, i) => (
-                  <tr key={p.productId} className="border-b border-border last:border-0 hover:bg-muted/30">
+                  <tr
+                    key={p.productId}
+                    className="border-border hover:bg-muted/30 border-b last:border-0"
+                  >
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground tabular-nums text-xs w-5">{i + 1}</span>
-                        <span className="text-foreground">{isAr ? p.nameAr : p.nameEn}</span>
+                        <span className="text-muted-foreground w-5 text-xs tabular-nums">
+                          {i + 1}
+                        </span>
+                        <span className="text-foreground">
+                          {isAr ? p.nameAr : p.nameEn}
+                        </span>
                       </div>
                     </td>
-                    <td className="px-5 py-3 text-muted-foreground">{p.brand}</td>
-                    <td className="px-5 py-3 text-end tabular-nums">{formatSar(p.sales, locale)}</td>
-                    <td className="px-5 py-3 text-end tabular-nums">{formatNumber(p.units, locale)}</td>
+                    <td className="text-muted-foreground px-5 py-3">
+                      {p.brand}
+                    </td>
+                    <td className="px-5 py-3 text-end tabular-nums">
+                      {formatSar(p.sales, locale)}
+                    </td>
+                    <td className="px-5 py-3 text-end tabular-nums">
+                      {formatNumber(p.units, locale)}
+                    </td>
                   </tr>
                 ))}
                 {topProducts.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="px-5 py-8 text-center text-muted-foreground">
+                    <td
+                      colSpan={4}
+                      className="text-muted-foreground px-5 py-8 text-center"
+                    >
                       {t("empty")}
                     </td>
                   </tr>

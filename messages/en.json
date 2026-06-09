@@ -36,7 +36,8 @@
     "support": "Support",
     "campaigns": "Campaigns",
     "shadeFinder": "Shade Finder",
-    "section_tools": "Tools"
+    "section_tools": "Tools",
+    "affiliates": "Affiliates"
   },
   "shell": {
     "collapseSidebar": "Collapse sidebar",
@@ -182,6 +183,10 @@
     "shadeFinder": {
       "title": "AI Shade Finder",
       "description": "AI-powered quiz to match staff or customers to the right foundation and concealer shade."
+    },
+    "affiliates": {
+      "title": "Affiliates & Influencers",
+      "description": "Manage Snapchat & social influencers, tracking codes, and commission payouts."
     }
   },
   "orders": {
@@ -1941,6 +1946,104 @@
       "applied": "Applied",
       "bundleName": "Bundle: {name}",
       "remove": "Remove"
+    }
+  },
+  "affiliates": {
+    "title": "Affiliates & Influencers",
+    "subtitle": "Manage influencer partners, unique tracking codes, and commission on attributed sales.",
+    "newAffiliate": "New affiliate",
+    "backToAffiliates": "Back to affiliates",
+    "channel": {
+      "SNAPCHAT": "Snapchat",
+      "INSTAGRAM": "Instagram",
+      "TIKTOK": "TikTok",
+      "YOUTUBE": "YouTube",
+      "OTHER": "Other"
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "PAUSED": "Paused",
+      "ENDED": "Ended"
+    },
+    "table": {
+      "name": "Affiliate",
+      "channel": "Channel",
+      "code": "Code",
+      "rate": "Rate",
+      "conversions": "Orders",
+      "revenue": "Revenue",
+      "commission": "Commission",
+      "newCustomers": "New customers",
+      "status": "Status"
+    },
+    "stats": {
+      "conversions": "Attributed orders",
+      "revenue": "Net revenue driven",
+      "commission": "Commission owed",
+      "newCustomers": "New customers"
+    },
+    "conversions": {
+      "title": "Recent attributed orders",
+      "empty": "No attributed orders yet. Orders that carry this affiliate's code will appear here.",
+      "order": "Order",
+      "date": "Date",
+      "netRevenue": "Net revenue",
+      "commission": "Commission",
+      "customer": "Customer",
+      "new": "New",
+      "returning": "Returning"
+    },
+    "empty": {
+      "title": "No affiliates yet",
+      "body": "Add your first influencer partner to issue a tracking code and start attributing sales and commission."
+    },
+    "pagination": {
+      "showing": "{count} of {total} affiliates",
+      "page": "Page {page} of {pageCount}",
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "form": {
+      "createTitle": "New affiliate",
+      "editTitle": "Edit affiliate",
+      "createSubtitle": "Register an influencer partner and issue their tracking code.",
+      "editSubtitle": "Update partner details, commission, and contract terms.",
+      "sectionDetails": "Affiliate details",
+      "name": "Full name",
+      "handle": "Social handle",
+      "handlePlaceholder": "@noura.beauty",
+      "channel": "Channel",
+      "status": "Status",
+      "code": "Tracking code",
+      "codePlaceholder": "NOURA10",
+      "codeHint": "Shoppers enter this at checkout to attribute the sale. Letters, numbers, and dashes only.",
+      "commissionRate": "Commission rate",
+      "commissionRateHint": "Percentage of net (ex-VAT) revenue, 0–100.",
+      "email": "Email",
+      "phone": "Phone",
+      "contractTerms": "Contract terms",
+      "contractTermsPlaceholder": "Rate card, exclusivity, payout schedule, deliverables…",
+      "save": "Save affiliate",
+      "saving": "Saving…",
+      "saved": "Affiliate saved.",
+      "create": "Create affiliate",
+      "creating": "Creating…",
+      "delete": "Delete",
+      "deleting": "Deleting…",
+      "confirmDelete": "Delete this affiliate and all its conversions?",
+      "cancel": "Cancel",
+      "errors": {
+        "nameRequired": "Name is required.",
+        "handleRequired": "Social handle is required.",
+        "codeRequired": "Tracking code must be at least 3 characters.",
+        "codeTooLong": "Tracking code is too long (max 32).",
+        "codeInvalid": "Use only letters, numbers, and dashes.",
+        "codeTaken": "That tracking code is already in use.",
+        "rateInvalid": "Enter a commission rate between 0 and 100.",
+        "emailInvalid": "Enter a valid email address.",
+        "notFound": "Affiliate not found.",
+        "unknown": "Something went wrong. Please try again."
+      }
     }
   }
 }

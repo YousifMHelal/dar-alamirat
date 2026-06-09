@@ -23,6 +23,7 @@ import {
   Star,
   Sparkles,
   Megaphone,
+  Share2,
   type LucideIcon,
 } from "lucide-react";
 
@@ -53,6 +54,7 @@ export const modules = [
   { key: "campaigns", href: "/campaigns", icon: Megaphone },
   { key: "loyalty", href: "/loyalty", icon: Gift },
   { key: "giftCards", href: "/gift-cards", icon: TicketCheck },
+  { key: "affiliates", href: "/affiliates", icon: Share2 },
   // Tools
   { key: "shadeFinder", href: "/shade-finder", icon: Sparkles },
   // Finance
@@ -84,7 +86,7 @@ export const navSections = [
   },
   {
     key: "marketing",
-    modules: ["content", "seo", "coupons", "campaigns", "loyalty", "giftCards"],
+    modules: ["content", "seo", "coupons", "campaigns", "affiliates", "loyalty", "giftCards"],
   },
   {
     key: "tools",
@@ -116,6 +118,7 @@ export type ModuleKey =
   | "seo"
   | "coupons"
   | "campaigns"
+  | "affiliates"
   | "loyalty"
   | "giftCards"
   | "financials"
