@@ -1831,6 +1831,9 @@
       "tryAgain": "Start over"
     },
     "errors": {
+      "noCatalog": "No foundation or concealer products are available in the catalog right now.",
+      "rateLimited": "The AI request limit has been reached. Please try again in a moment.",
+      "unavailable": "The AI service is busy right now. Please try again in a few seconds.",
       "unknown": "Something went wrong. Please try again."
     }
   },

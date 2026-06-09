@@ -23,9 +23,44 @@ export interface ShadeRecommendation {
   reasoning: string;
 }
 
+export type ShadeFinderError = "noCatalog" | "rateLimited" | "unavailable" | "unknown";
+
 export type ShadeFinderResult =
   | { ok: true; recommendations: ShadeRecommendation[] }
-  | { ok: false; error: string };
+  | { ok: false; error: ShadeFinderError };
+
+/** Run a Gemini call with retry + exponential backoff on transient 429/503 errors. */
+async function withRetry<T>(fn: () => Promise<T>, attempts = 3): Promise<T> {
+  let lastErr: unknown;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastErr = err;
+      const status = errorStatus(err);
+      // Only retry transient errors; fail fast on everything else.
+      if (status !== 429 && status !== 503) throw err;
+      if (i < attempts - 1) {
+        await new Promise((r) => setTimeout(r, 1500 * 2 ** i + Math.random() * 500));
+      }
+    }
+  }
+  throw lastErr;
+}
+
+/** Extract the HTTP status code from a Gemini ApiError, if present. */
+function errorStatus(err: unknown): number | undefined {
+  if (err && typeof err === "object") {
+    const e = err as { status?: unknown; code?: unknown; message?: unknown };
+    if (typeof e.status === "number") return e.status;
+    if (typeof e.code === "number") return e.code;
+    if (typeof e.message === "string") {
+      const m = e.message.match(/"code"\s*:\s*(\d+)/);
+      if (m) return Number(m[1]);
+    }
+  }
+  return undefined;
+}
 
 export async function findShades(input: ShadeFinderInput): Promise<ShadeFinderResult> {
   try {
@@ -104,10 +139,12 @@ Respond ONLY with valid JSON in this exact format, no extra text:
   ]
 }`;
 
-    const response = await client.models.generateContent({
-      model: GEMINI_MODEL,
-      contents: prompt,
-    });
+    const response = await withRetry(() =>
+      client.models.generateContent({
+        model: GEMINI_MODEL,
+        contents: prompt,
+      }),
+    );
 
     const text = response.text?.trim() ?? "";
     const json = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
@@ -144,6 +181,9 @@ Respond ONLY with valid JSON in this exact format, no extra text:
     return { ok: true, recommendations };
   } catch (err) {
     console.error("[AI] findShades failed:", err);
-    return { ok: false, error: err instanceof Error ? err.message : "unknown" };
+    const status = errorStatus(err);
+    const error: ShadeFinderError =
+      status === 429 ? "rateLimited" : status === 503 ? "unavailable" : "unknown";
+    return { ok: false, error };
   }
 }

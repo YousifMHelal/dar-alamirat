@@ -63,7 +63,7 @@ export function ShadeFinderQuiz({ locale }: { locale: string }) {
       if (result.ok) {
         setResults(result.recommendations);
       } else {
-        setError(t("errors.unknown"));
+        setError(t(`errors.${result.error}`));
       }
     } finally {
       setLoading(false);
