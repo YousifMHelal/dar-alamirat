@@ -30,6 +30,7 @@ function LinksSection({ productId, type, initial, locale }: SectionProps) {
 
   const name = (p: ProductLinkRow) => locale === "ar" ? p.nameAr : p.nameEn;
   const selectedIds = selected.map((p) => p.id);
+  const selectedIdsKey = selectedIds.join(",");
 
   useEffect(() => {
     if (!query.trim()) { setResults([]); return; }
@@ -37,14 +38,16 @@ function LinksSection({ productId, type, initial, locale }: SectionProps) {
     debounceRef.current = setTimeout(async () => {
       setSearching(true);
       try {
-        const res = await searchProductsAction(query, [productId, ...selectedIds]);
+        const excluded = [productId, ...selectedIds];
+        const res = await searchProductsAction(query, excluded);
         setResults(res);
       } finally {
         setSearching(false);
       }
     }, 300);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
-  }, [query, selectedIds.join(",")]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, selectedIdsKey, productId]);
 
   const add = useCallback((p: ProductLinkRow) => {
     setSelected((prev) => [...prev, p]);
@@ -194,10 +197,12 @@ export function ProductLinksEditor({ productId, locale, crossSell, upSell }: Pro
   const t = useTranslations("catalog.links");
 
   return (
-    <section className="flex flex-col gap-6 rounded-xl border border-border p-5">
+    <section className="bg-surface border-border flex flex-col gap-6 rounded-xl border p-5">
       <div>
         <h2 className="text-base font-semibold">{t("sectionTitle")}</h2>
-        <p className="text-muted-foreground mt-0.5 text-sm">{t("sectionSubtitle")}</p>
+        <p className="text-muted-foreground mt-0.5 text-sm">
+          {t("sectionSubtitle")}
+        </p>
       </div>
 
       <div className="flex flex-col gap-6">

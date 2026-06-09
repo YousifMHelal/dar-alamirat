@@ -17,6 +17,7 @@ import {
   type SetTierPricesInput,
   type UpdateProductInput,
 } from "./schema";
+import { searchProductsForLink } from "./queries";
 
 /**
  * Server actions for the Catalog module. Each mutation asserts an auth'd
@@ -270,7 +271,6 @@ export async function searchProductsAction(
   excludeIds: string[],
 ) {
   await requireUser();
-  const { searchProductsForLink } = await import("./queries");
   return searchProductsForLink(q, excludeIds);
 }
 
