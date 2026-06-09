@@ -229,6 +229,56 @@ export async function listPricingTiers() {
   });
 }
 
+/** Minimal product shape used in the links editor search results and chips. */
+export interface ProductLinkRow {
+  id: string;
+  nameEn: string;
+  nameAr: string;
+  sku: string;
+  imageUrl: string | null;
+}
+
+/** Search products by name/SKU for the links editor autocomplete. */
+export async function searchProductsForLink(
+  q: string,
+  excludeIds: string[],
+): Promise<ProductLinkRow[]> {
+  const term = q.trim();
+  if (!term) return [];
+  return prisma.product.findMany({
+    where: {
+      active: true,
+      id: { notIn: excludeIds },
+      OR: [
+        { nameEn: { contains: term, mode: "insensitive" } },
+        { nameAr: { contains: term } },
+        { sku: { contains: term, mode: "insensitive" } },
+      ],
+    },
+    orderBy: { nameEn: "asc" },
+    take: 10,
+    select: { id: true, nameEn: true, nameAr: true, sku: true, imageUrl: true },
+  });
+}
+
+/** Returns cross-sell and up-sell lists for a product. */
+export async function getProductLinks(productId: string) {
+  const links = await prisma.productLink.findMany({
+    where: { fromId: productId },
+    select: {
+      type: true,
+      to: { select: { id: true, nameEn: true, nameAr: true, sku: true, imageUrl: true } },
+    },
+  });
+  const crossSell: ProductLinkRow[] = [];
+  const upSell: ProductLinkRow[] = [];
+  for (const l of links) {
+    if (l.type === "CROSS_SELL") crossSell.push(l.to);
+    else upSell.push(l.to);
+  }
+  return { crossSell, upSell };
+}
+
 /** Distinct brands present in the catalog (for the brand filter). */
 export async function listBrands(): Promise<string[]> {
   const rows = await prisma.product.findMany({

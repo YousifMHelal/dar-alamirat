@@ -9,9 +9,11 @@ import {
   getProductDetail,
   listCategories,
   listPricingTiers,
+  getProductLinks,
 } from "@/lib/catalog/queries";
 import { CatalogHeader } from "@/components/catalog/page-header";
 import { ProductForm } from "@/components/catalog/product-form";
+import { ProductLinksEditor } from "@/components/catalog/product-links-editor";
 
 const MODULE_KEY = "catalog";
 
@@ -35,10 +37,11 @@ export default async function EditProductPage({
   await requireModuleAccess(MODULE_KEY, locale);
 
   const t = await getTranslations({ locale, namespace: "catalog" });
-  const [product, categories, tiers] = await Promise.all([
+  const [product, categories, tiers, links] = await Promise.all([
     getProductDetail(id),
     listCategories(),
     listPricingTiers(),
+    getProductLinks(id),
   ]);
   if (!product) notFound();
 
@@ -62,6 +65,13 @@ export default async function EditProductPage({
         product={product}
         categories={categories}
         tiers={tiers.map((t) => ({ id: t.id, name: t.name }))}
+      />
+
+      <ProductLinksEditor
+        productId={product.id}
+        locale={locale}
+        crossSell={links.crossSell}
+        upSell={links.upSell}
       />
     </div>
   );

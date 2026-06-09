@@ -39,12 +39,16 @@ export function NavLinks({
         return (
           <div key={section.key} className="flex flex-col gap-0.5">
             {!collapsed && (
-              <span className="text-sidebar-muted px-3 pb-1.5 text-[10px] font-semibold tracking-widest uppercase">
-                {t(`section_${section.key}`)}
-              </span>
+              <div className="flex items-center gap-2 px-2 pb-1.5">
+                <span className="bg-primary h-4 w-1 rounded-full" />
+                <span className="text-primary text-[11px] font-extrabold tracking-[0.2em] uppercase">
+                  {t(`section_${section.key}`)}
+                </span>
+                <span className="border-primary/20 flex-1 border-t" />
+              </div>
             )}
             {collapsed && (
-              <div className="border-sidebar-border mx-auto mb-1 w-6 border-t" />
+              <div className="border-sidebar-border mx-auto mb-1 w-4 border-t" />
             )}
 
             {visibleModules.map(({ key, href, icon: Icon }) => {

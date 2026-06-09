@@ -276,11 +276,35 @@ model Product {
   seoMeta    SeoMeta?
   reviews    Review[]
 
+  linksFrom ProductLink[] @relation("LinkFrom")
+  linksTo   ProductLink[] @relation("LinkTo")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([categoryId])
   @@index([brand])
+}
+
+model ProductLink {
+  id   String          @id @default(cuid())
+  type ProductLinkType
+
+  fromId String
+  from   Product @relation("LinkFrom", fields: [fromId], references: [id], onDelete: Cascade)
+  toId   String
+  to     Product @relation("LinkTo", fields: [toId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([type, fromId, toId])
+  @@index([fromId])
+  @@index([toId])
+}
+
+enum ProductLinkType {
+  CROSS_SELL
+  UP_SELL
 }
 
 model ProductVariant {

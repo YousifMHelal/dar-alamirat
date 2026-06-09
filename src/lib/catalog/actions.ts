@@ -234,6 +234,46 @@ export async function setTierPrices(input: SetTierPricesInput): Promise<DeleteRe
   }
 }
 
+// ── Product links (cross-sell / up-sell) ─────────────────────
+
+/**
+ * Replace the full cross-sell or up-sell list for a product.
+ * `toIds` is the complete desired set; existing links not in it are deleted.
+ */
+export async function setProductLinks(
+  productId: string,
+  type: "CROSS_SELL" | "UP_SELL",
+  toIds: string[],
+): Promise<DeleteResult> {
+  await requireUser();
+  if (!productId) return { ok: false, error: "invalid" };
+  try {
+    await prisma.$transaction(async (tx) => {
+      await tx.productLink.deleteMany({ where: { fromId: productId, type } });
+      if (toIds.length > 0) {
+        await tx.productLink.createMany({
+          data: toIds.map((toId) => ({ fromId: productId, toId, type })),
+          skipDuplicates: true,
+        });
+      }
+    });
+    revalidatePath(`/catalog/${productId}`);
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "unknown" };
+  }
+}
+
+/** Search products for the links editor (proxied through a server action so the client doesn't need a fetch route). */
+export async function searchProductsAction(
+  q: string,
+  excludeIds: string[],
+) {
+  await requireUser();
+  const { searchProductsForLink } = await import("./queries");
+  return searchProductsForLink(q, excludeIds);
+}
+
 // ── Category mutations ────────────────────────────────────────
 
 export type CategoryMutationResult =

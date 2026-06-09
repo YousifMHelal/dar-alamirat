@@ -12,28 +12,28 @@
     "section_customers": "Customers",
     "section_finance": "Reports",
     "section_system": "System",
-    "overview": "Overview & BI Analytics",
-    "orders": "Delivery & OMS",
-    "catalog": "Items & Catalog (B2B)",
+    "overview": "Dashboard",
+    "orders": "Orders",
+    "catalog": "Catalog",
     "categories": "Categories",
-    "inventory": "Inventory & Warehouses",
-    "content": "Content & App Layout",
-    "seo": "SEO Engine",
-    "coupons": "Coupons & Promotions",
-    "loyalty": "Loyalty Program",
-    "financials": "Financials & VAT",
+    "inventory": "Inventory",
+    "content": "Storefront",
+    "seo": "SEO",
+    "coupons": "Promotions",
+    "loyalty": "Loyalty",
+    "financials": "Financials",
     "reports": "Reports",
     "customers": "Customers",
-    "staff": "Staff & Roles",
-    "shipping": "Shipping & Zones",
+    "staff": "Staff",
+    "shipping": "Shipping",
     "reviews": "Reviews",
-    "settings": "Settings & Integrations",
+    "settings": "Integrations",
     "abandonedCarts": "Abandoned Carts",
     "importExport": "Import & Export",
     "giftCards": "Gift Cards",
-    "performance": "Store Performance",
+    "performance": "Performance",
     "notifications": "Notifications",
-    "support": "Help Center & Support"
+    "support": "Support"
   },
   "shell": {
     "collapseSidebar": "Collapse sidebar",
@@ -620,6 +620,20 @@
       "errors": {
         "unknown": "Something went wrong. Please try again."
       }
+    },
+    "links": {
+      "sectionTitle": "Product Recommendations",
+      "sectionSubtitle": "Link related products to boost discovery and average order value.",
+      "crossSellTitle": "Cross-sell",
+      "crossSellHint": "shown alongside this product (\"You might also like\")",
+      "upSellTitle": "Up-sell",
+      "upSellHint": "shown as premium alternatives (\"Consider upgrading to\")",
+      "searchPlaceholder": "Search by name or SKU…",
+      "remove": "Remove",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Saved",
+      "saveError": "Failed to save links."
     }
   },
   "inventory": {
