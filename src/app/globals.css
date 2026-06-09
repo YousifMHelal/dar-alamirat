@@ -15,7 +15,7 @@
      <html> by the locale layout; --font-display comes from next/font. */
   --font-sans:
     var(--font-latin), var(--font-arabic), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-display), Georgia, "Times New Roman", serif;
+  --font-display: var(--font-display), Georgia, serif;
 
   /* Map semantic tokens into Tailwind's color namespace so utilities
      like bg-background / text-foreground / border-border just work. */

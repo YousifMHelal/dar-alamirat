@@ -1,7 +1,7 @@
 import {
   IBM_Plex_Sans_Arabic,
   Inter,
-  Playfair_Display,
+  Fraunces,
 } from "next/font/google";
 
 /**
@@ -30,7 +30,7 @@ export const plexArabic = IBM_Plex_Sans_Arabic({
   variable: "--font-plex-arabic",
 });
 
-export const playfair = Playfair_Display({
+export const playfair = Fraunces({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   display: "swap",
