@@ -17,7 +17,7 @@ import {
   type SetTierPricesInput,
   type UpdateProductInput,
 } from "./schema";
-import { searchProductsForLink } from "./queries";
+import { searchProductsForLink, type ProductLinkRow } from "./queries";
 
 /**
  * Server actions for the Catalog module. Each mutation asserts an auth'd
@@ -269,9 +269,18 @@ export async function setProductLinks(
 export async function searchProductsAction(
   q: string,
   excludeIds: string[],
-) {
-  await requireUser();
-  return searchProductsForLink(q, excludeIds);
+): Promise<
+  | { ok: true; products: ProductLinkRow[] }
+  | { ok: false; error: string }
+> {
+  try {
+    await requireUser();
+    const products = await searchProductsForLink(q, excludeIds);
+    return { ok: true, products };
+  } catch (err) {
+    console.error("searchProductsAction failed", err);
+    return { ok: false, error: "search_failed" };
+  }
 }
 
 // ── Category mutations ────────────────────────────────────────

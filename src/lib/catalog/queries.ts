@@ -251,7 +251,7 @@ export async function searchProductsForLink(
       id: { notIn: excludeIds },
       OR: [
         { nameEn: { contains: term, mode: "insensitive" } },
-        { nameAr: { contains: term } },
+        { nameAr: { contains: term, mode: "insensitive" } },
         { sku: { contains: term, mode: "insensitive" } },
       ],
     },

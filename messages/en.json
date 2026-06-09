@@ -633,7 +633,8 @@
       "save": "Save",
       "saving": "Saving…",
       "saved": "Saved",
-      "saveError": "Failed to save links."
+      "saveError": "Failed to save links.",
+      "searchError": "Search failed. Please try again."
     }
   },
   "inventory": {
