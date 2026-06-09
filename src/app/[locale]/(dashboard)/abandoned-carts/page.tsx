@@ -163,7 +163,15 @@ export default async function AbandonedCartsPage({
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      <CartActions id={c.id} status={c.status} recoveryLink={c.recoveryLink} />
+                      <CartActions
+                        id={c.id}
+                        status={c.status}
+                        recoveryLink={c.recoveryLink}
+                        customerName={c.customer.name}
+                        customerPhone={c.customer.phone ?? null}
+                        items={c.items}
+                        subtotal={c.subtotal}
+                      />
                     </td>
                   </tr>
                 ))}

@@ -619,12 +619,22 @@ model Review {
   body   String
   status ReviewStatus @default(PENDING)
 
+  // AI-generated sentiment analysis (populated on-demand)
+  sentiment ReviewSentiment?
+  themes    String[]         @default([])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([productId])
   @@index([customerId])
   @@index([status])
+}
+
+enum ReviewSentiment {
+  POSITIVE
+  NEUTRAL
+  NEGATIVE
 }
 
 // ─────────────────────────────────────────────────────────────

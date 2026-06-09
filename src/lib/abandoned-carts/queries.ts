@@ -2,6 +2,12 @@ import { prisma } from "@/lib/prisma";
 
 export const ABANDONED_CARTS_PAGE_SIZE = 15;
 
+export interface CartItemSnapshot {
+  name: string;
+  quantity: number;
+  price: string;
+}
+
 export interface AbandonedCartsFilter {
   status?: "ACTIVE" | "RECOVERED" | "EXPIRED";
   page: number;
@@ -35,16 +41,20 @@ export async function listAbandonedCarts(filter: AbandonedCartsFilter) {
   ]);
 
   return {
-    rows: rows.map((c) => ({
-      id: c.id,
-      subtotal: c.subtotal.toFixed(2),
-      status: c.status,
-      lastActivityAt: c.lastActivityAt,
-      recoveryLink: c.recoveryLink,
-      reminderSentAt: c.reminderSentAt,
-      itemCount: Array.isArray(c.items) ? c.items.length : 0,
-      customer: c.customer,
-    })),
+    rows: rows.map((c) => {
+      const items = Array.isArray(c.items) ? (c.items as unknown as CartItemSnapshot[]) : [];
+      return {
+        id: c.id,
+        subtotal: c.subtotal.toFixed(2),
+        status: c.status,
+        lastActivityAt: c.lastActivityAt,
+        recoveryLink: c.recoveryLink,
+        reminderSentAt: c.reminderSentAt,
+        itemCount: items.length,
+        items,
+        customer: c.customer,
+      };
+    }),
     total,
     page,
     pageCount: Math.max(1, Math.ceil(total / ABANDONED_CARTS_PAGE_SIZE)),

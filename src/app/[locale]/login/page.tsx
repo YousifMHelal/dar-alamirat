@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
-import logo from "@/logo.avif";
+import logo from "@/logo.png";
 import { LanguageToggle } from "@/components/shell/language-toggle";
 import { LoginForm } from "@/components/auth/login-form";
 

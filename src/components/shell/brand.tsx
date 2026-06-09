@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import logo from "@/logo.avif";
+import logo from "@/logo.png";
 
 export function Brand({ compact = false }: { compact?: boolean }) {
   const t = useTranslations("brand");

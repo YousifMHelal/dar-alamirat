@@ -2,12 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { Loader2, Save, CheckCircle2, AlertTriangle, ArrowLeft, Code2 } from "lucide-react";
+import { Loader2, Save, CheckCircle2, AlertTriangle, ArrowLeft, Code2, Sparkles } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import { saveProductSeo } from "@/lib/seo/actions";
+import { generateProductSeo } from "@/lib/ai/generate-seo";
 import type { ProductSeoDetail } from "@/lib/seo/queries";
 
 /**
@@ -46,6 +47,30 @@ export function MetaEditor({
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [isSaving, startSave] = useTransition();
+  const [isGenerating, startGenerate] = useTransition();
+
+  const onGenerateSeo = () => {
+    startGenerate(async () => {
+      // Extract category from the product path: /products/{category-slug}/{sku}
+      const pathParts = product.path.split("/").filter(Boolean);
+      const category = pathParts[1] ?? "";
+      const res = await generateProductSeo({
+        nameEn: product.nameEn,
+        nameAr: product.nameAr,
+        brand: product.brand,
+        category,
+        sku: product.sku,
+      });
+      if (res.ok) {
+        setMetaTitle(res.metaTitle);
+        setMetaDescription(res.metaDescription);
+        setKeywords(res.keywords);
+        toast(t("ai.success"), "success");
+      } else {
+        toast(t("ai.error"), "error");
+      }
+    });
+  };
   // Preview the JSON-LD that WILL be stored (mirrors the server builder).
   const previewJsonLd = {
     "@context": "https://schema.org",
@@ -106,9 +131,26 @@ export function MetaEditor({
       <div className="grid gap-6 lg:grid-cols-2">
         {/* ── Form ───────────────────────────────────────────────── */}
         <section className="bg-card shadow-soft border-border flex flex-col gap-4 rounded-2xl border p-5">
-          <h2 className="font-display text-foreground text-lg font-semibold">
-            {t("editorTitle", { name: locale === "ar" ? product.nameAr : product.nameEn })}
-          </h2>
+          <div className="flex items-start justify-between gap-2">
+            <h2 className="font-display text-foreground text-lg font-semibold">
+              {t("editorTitle", { name: locale === "ar" ? product.nameAr : product.nameEn })}
+            </h2>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={onGenerateSeo}
+              disabled={isGenerating}
+              className="shrink-0 gap-1.5 text-xs"
+            >
+              {isGenerating ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <Sparkles className="size-3.5" />
+              )}
+              {isGenerating ? t("ai.generating") : t("ai.generate")}
+            </Button>
+          </div>
 
           <div>
             <div className="flex items-center justify-between">

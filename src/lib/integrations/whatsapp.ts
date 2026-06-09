@@ -165,6 +165,60 @@ export async function sendOrderStatusUpdate(
 }
 
 /**
+ * Send a free-form text message (non-template). Only works within the 24-hour
+ * customer-initiated conversation window; outside that window WhatsApp requires
+ * an approved template. Used for cart recovery replies where a human is
+ * responding to a recently active customer.
+ */
+export async function sendWhatsAppText(params: {
+  to: string;
+  text: string;
+}): Promise<{ ok: true; messageId: string } | { ok: false; error: string }> {
+  const { token, phoneId, baseUrl } = getConfig();
+
+  if (!token || !phoneId) {
+    return {
+      ok: false,
+      error: "WhatsApp not configured: set WHATSAPP_TOKEN and WHATSAPP_PHONE_ID",
+    };
+  }
+
+  const recipient = process.env.WHATSAPP_TEST_NUMBER ?? params.to;
+  const normalised = recipient.replace(/^\+/, "").replace(/\s/g, "");
+
+  const body = {
+    messaging_product: "whatsapp",
+    recipient_type: "individual",
+    to: normalised,
+    type: "text",
+    text: { preview_url: false, body: params.text },
+  };
+
+  interface MetaSendResponse {
+    messages?: Array<{ id: string }>;
+    error?: { message: string };
+  }
+
+  const result = await integrationFetch<MetaSendResponse>(
+    `${baseUrl}/${phoneId}/messages`,
+    {
+      provider: "WhatsApp",
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body,
+    },
+  );
+
+  if (!result.ok) return { ok: false, error: result.error.message };
+  if (result.data.error) return { ok: false, error: result.data.error.message };
+
+  const msg = result.data.messages?.[0];
+  if (!msg) return { ok: false, error: "No message ID returned" };
+
+  return { ok: true, messageId: msg.id };
+}
+
+/**
  * Status label lookup — maps DB enum to a human-readable label per locale.
  * Extend as templates are localised.
  */

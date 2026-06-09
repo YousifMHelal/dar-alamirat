@@ -8,6 +8,7 @@ import { listReviews, getReviewStats } from "@/lib/reviews/queries";
 import { formatNumber } from "@/lib/format";
 import { CatalogHeader } from "@/components/catalog/page-header";
 import { Badge } from "@/components/ui/badge";
+import { ReviewSentimentButton } from "@/components/reviews/review-sentiment-button";
 
 const MODULE_KEY = "reviews";
 
@@ -227,6 +228,16 @@ export default async function ReviewsPage({
                 </Badge>
               </div>
               <p className="text-foreground text-sm leading-relaxed">{r.body}</p>
+              <div className="flex items-center justify-between gap-3 pt-1">
+                <ReviewSentimentButton
+                  reviewId={r.id}
+                  body={r.body}
+                  title={r.title}
+                  rating={r.rating}
+                  sentiment={r.sentiment ?? null}
+                  themes={r.themes}
+                />
+              </div>
             </article>
           ))}
 

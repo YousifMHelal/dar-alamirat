@@ -11,6 +11,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   ImageOff,
+  Sparkles,
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "@/i18n/navigation";
@@ -22,6 +23,7 @@ import {
   updateProduct,
   deleteProduct,
 } from "@/lib/catalog/actions";
+import { generateProductDescription } from "@/lib/ai/generate-description";
 import type { ProductDetail } from "@/lib/catalog/queries";
 import { TierPriceEditor } from "./tier-price-editor";
 
@@ -126,6 +128,36 @@ export function ProductForm({
   const [saved, setSaved] = useState(false);
   const [isSaving, startSave] = useTransition();
   const [isDeleting, startDelete] = useTransition();
+  const [isGenerating, startGenerate] = useTransition();
+
+  const onGenerateDescription = () => {
+    if (!form.nameEn && !form.nameAr) {
+      toast(t("form.ai.needName"), "error");
+      return;
+    }
+    startGenerate(async () => {
+      const categoryName =
+        categories.find((c) => c.id === form.categoryId)?.[locale === "ar" ? "nameAr" : "nameEn"] ?? "";
+      const firstCapacity = variants[0]?.capacity ?? "";
+      const res = await generateProductDescription({
+        nameEn: form.nameEn,
+        nameAr: form.nameAr,
+        brand: form.brand,
+        category: categoryName,
+        capacity: firstCapacity,
+      });
+      if (res.ok) {
+        setForm((f) => ({
+          ...f,
+          descriptionEn: res.descriptionEn,
+          descriptionAr: res.descriptionAr,
+        }));
+        toast(t("form.ai.success"), "success");
+      } else {
+        toast(t("form.ai.error"), "error");
+      }
+    });
+  };
 
   const set = (k: keyof typeof form, v: string | boolean) =>
     setForm((f) => ({ ...f, [k]: v }));
@@ -247,7 +279,24 @@ export function ProductForm({
             />
           </div>
           <div className="sm:col-span-2">
-            <Label htmlFor="descEn">{t("form.descriptionEn")}</Label>
+            <div className="mb-1.5 flex items-center justify-between gap-2">
+              <Label htmlFor="descEn" className="mb-0">{t("form.descriptionEn")}</Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={onGenerateDescription}
+                disabled={isGenerating}
+                className="text-xs gap-1.5"
+              >
+                {isGenerating ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <Sparkles className="size-3.5" />
+                )}
+                {isGenerating ? t("form.ai.generating") : t("form.ai.generate")}
+              </Button>
+            </div>
             <textarea
               id="descEn"
               rows={2}

@@ -491,6 +491,13 @@
       "deleting": "Deleting…",
       "confirmDelete": "Delete this product and all its variants? This cannot be undone.",
       "cancel": "Cancel",
+      "ai": {
+        "generate": "Generate with AI",
+        "generating": "Generating…",
+        "success": "Descriptions generated successfully.",
+        "error": "AI generation failed. Please try again.",
+        "needName": "Enter a product name first."
+      },
       "errors": {
         "nameArRequired": "Arabic name is required.",
         "nameEnRequired": "English name is required.",
@@ -909,7 +916,13 @@
       "jsonLdTitle": "Product JSON-LD",
       "jsonLdHint": "Generated and stored on save — emitted on the product page.",
       "charCount": "{count} / {max}",
-      "back": "Back to list"
+      "back": "Back to list",
+      "ai": {
+        "generate": "Generate with AI",
+        "generating": "Generating…",
+        "success": "SEO metadata generated successfully.",
+        "error": "AI generation failed. Please try again."
+      }
     },
     "redirects": {
       "title": "Redirects",
@@ -1334,6 +1347,16 @@
     "empty": {
       "title": "No reviews match these filters",
       "body": "Try clearing the status or rating filter to see every review on record."
+    },
+    "sentiment": {
+      "analyze": "Analyze",
+      "analyzing": "Analyzing…",
+      "reanalyze": "Re-analyze sentiment",
+      "success": "Sentiment analysis saved",
+      "error": "Sentiment analysis failed. Please try again.",
+      "POSITIVE": "Positive",
+      "NEUTRAL": "Neutral",
+      "NEGATIVE": "Negative"
     }
   },
   "settings": {
@@ -1403,8 +1426,20 @@
       "markedRecovered": "Cart marked as recovered.",
       "linkCopied": "Recovery link copied.",
       "copyLink": "Copy recovery link",
+      "ai": {
+        "generate": "AI Recovery Message",
+        "generating": "Generating…",
+        "previewTitle": "WhatsApp Recovery Message",
+        "copy": "Copy",
+        "copied": "Message copied to clipboard.",
+        "send": "Send via WhatsApp",
+        "sending": "Sending…",
+        "whatsappSent": "WhatsApp message sent.",
+        "error": "AI generation failed. Please try again."
+      },
       "errors": {
         "notFound": "Cart not found.",
+        "notActive": "This cart is no longer active.",
         "alreadyRecovered": "This cart is already recovered.",
         "unknown": "Something went wrong. Please try again."
       }
